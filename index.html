@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#06080f">
+  <title>Cosmic Frontier</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Starfield background canvas -->
+<canvas id="starfield"></canvas>
+
+<!-- Particle effects layer -->
+<div id="particles"></div>
+
+<!-- Splash screen -->
+<div id="splash">
+  <div class="splash-logo">🚀</div>
+  <div class="splash-title">COSMIC FRONTIER</div>
+  <div class="splash-sub">DEEP SPACE EXPLORATION</div>
+  <div class="splash-bar-bg"><div class="splash-bar-fill"></div></div>
+  <div class="splash-status">Initializing systems...</div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+
+  <!-- Location Header -->
+  <div id="location-header">
+    <!-- Rendered by UI.renderHeader() -->
+  </div>
+
+  <!-- Resources Bar (horizontal scroll) -->
+  <div id="resources-bar">
+    <!-- Rendered by UI.renderResources() -->
+  </div>
+
+  <!-- Tab Content Area -->
+  <div id="tab-area">
+
+    <!-- BASE TAB -->
+    <div class="tab-content active" id="tab-base">
+      <!-- Rendered by UI.renderBase() -->
+    </div>
+
+    <!-- RESEARCH TAB -->
+    <div class="tab-content" id="tab-research">
+      <!-- Rendered by UI.renderResearch() -->
+    </div>
+
+    <!-- BUILD TAB -->
+    <div class="tab-content" id="tab-build">
+      <!-- Rendered by UI.renderBuild() -->
+    </div>
+
+    <!-- LAUNCH TAB -->
+    <div class="tab-content" id="tab-launch">
+      <!-- Rendered by UI.renderLaunch() -->
+    </div>
+
+    <!-- MAP TAB -->
+    <div class="tab-content" id="tab-map">
+      <!-- Rendered by UI.renderMap() -->
+    </div>
+
+    <!-- LOG TAB -->
+    <div class="tab-content" id="tab-log">
+      <!-- Rendered by UI.renderLog() -->
+    </div>
+
+  </div><!-- #tab-area -->
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav">
+    <button class="tab-btn active" data-tab="base">
+      <span class="tab-icon">🌍</span>
+      <span class="tab-label">BASE</span>
+    </button>
+    <button class="tab-btn" data-tab="research">
+      <span class="tab-icon">🔬</span>
+      <span class="tab-label">RESEARCH</span>
+    </button>
+    <button class="tab-btn" data-tab="build">
+      <span class="tab-icon">🏗</span>
+      <span class="tab-label">BUILD</span>
+    </button>
+    <button class="tab-btn" data-tab="launch">
+      <span class="tab-icon">🚀</span>
+      <span class="tab-label">LAUNCH</span>
+    </button>
+    <button class="tab-btn" data-tab="map">
+      <span class="tab-icon">🗺</span>
+      <span class="tab-label">MAP</span>
+    </button>
+    <button class="tab-btn" data-tab="log">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">LOG</span>
+    </button>
+  </nav>
+
+</div><!-- #app -->
+
+<!-- ============ OVERLAYS ============ -->
+
+<!-- Secret Discovery Reveal -->
+<div class="overlay" id="secret-overlay">
+  <div class="overlay-box">
+    <div id="secret-content">
+      <!-- Rendered dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Arrival Overlay -->
+<div class="overlay" id="arrival-overlay">
+  <div class="overlay-box">
+    <div id="arrival-content">
+      <!-- Rendered dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Offline Progress Overlay -->
+<div class="overlay" id="offline-overlay">
+  <div class="overlay-box">
+    <div id="offline-content">
+      <!-- Rendered dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Notifications -->
+<div id="notifications"></div>
+
+<!-- Tutorial popup -->
+<div id="tutorial-popup">
+  <!-- Rendered dynamically -->
+</div>
+
+<!-- ============ SCRIPTS ============ -->
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
