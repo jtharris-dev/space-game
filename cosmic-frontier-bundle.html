@@ -1,0 +1,4197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#06080f">
+  <title>Cosmic Frontier</title>
+  <style>
+/* ============================================================
+   COSMIC FRONTIER - Stylesheet
+   Dark space theme with neon accents and smooth animations
+   ============================================================ */
+
+/* ---- RESET & BASE ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #06080f;
+  --surface:     #0c1020;
+  --surface2:    #121830;
+  --surface3:    #1a2240;
+  --border:      #1e2d50;
+  --border2:     #2a3d6a;
+  --text:        #c8d8f8;
+  --text-dim:    #6880a8;
+  --text-bright: #e8f0ff;
+  --cyan:        #00d4ff;
+  --gold:        #ffd700;
+  --green:       #2ecc71;
+  --red:         #e74c3c;
+  --purple:      #9b59b6;
+  --orange:      #f39c12;
+  --pink:        #ff44aa;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.5);
+  --glow-cyan: 0 0 20px rgba(0,212,255,0.3);
+  --glow-gold: 0 0 20px rgba(255,215,0,0.3);
+  --transition: 0.2s ease;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ---- STARFIELD ---- */
+#starfield {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
+/* ---- PARTICLES ---- */
+#particles {
+  position: fixed; inset: 0; z-index: 10;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: particle-burst 0.8s ease-out forwards;
+}
+
+@keyframes particle-burst {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* ---- SPLASH SCREEN ---- */
+#splash {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.6s;
+}
+
+#splash.fade-out { opacity: 0; }
+
+.splash-logo {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.splash-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-shadow: var(--glow-cyan);
+  margin-bottom: 4px;
+}
+
+.splash-sub {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 5px;
+  margin-bottom: 40px;
+}
+
+.splash-bar-bg {
+  width: 260px; height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.splash-bar-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  transition: width 0.12s linear;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.splash-status {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+}
+
+/* ---- MAIN LAYOUT ---- */
+#app {
+  position: fixed; inset: 0; z-index: 1;
+  display: flex; flex-direction: column;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ---- HEADER ---- */
+#location-header {
+  background: linear-gradient(180deg, rgba(12,16,32,0.98) 0%, rgba(6,8,15,0.95) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.location-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid;
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+}
+
+.location-icon { font-size: 2rem; }
+
+.location-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.location-dist {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.base-indicator {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--gold);
+  background: rgba(255,215,0,0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,215,0,0.3);
+}
+
+/* Mission inline */
+.mission-inline {
+  padding: 4px 0 2px;
+}
+
+.mission-label {
+  font-size: 0.72rem;
+  color: var(--cyan);
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+}
+
+.mission-bar-wrap {
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mission-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  transition: width 0.5s linear;
+  box-shadow: 0 0 8px var(--cyan);
+  position: relative;
+}
+
+.mission-bar-wrap.big { height: 12px; border-radius: 6px; }
+.mission-bar-wrap.big .mission-bar { border-radius: 6px; }
+
+.thruster-glow {
+  position: absolute; right: -4px; top: -4px; bottom: -4px; width: 12px;
+  background: radial-gradient(ellipse, var(--cyan), transparent);
+  animation: thruster 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes thruster {
+  from { opacity: 0.5; width: 10px; }
+  to   { opacity: 1.0; width: 20px; }
+}
+
+/* ---- RESOURCES BAR ---- */
+#resources-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  background: rgba(6,8,15,0.9);
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.resource-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 10px;
+  flex-shrink: 0;
+  min-width: 90px;
+  transition: border-color var(--transition);
+  position: relative;
+}
+
+.resource-chip:hover { border-color: var(--res-color, var(--border2)); }
+
+.res-icon { font-size: 1rem; }
+
+.res-details { flex: 1; min-width: 0; }
+
+.res-name {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.res-amount {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+.res-rate {
+  font-size: 0.65rem;
+  color: var(--green);
+}
+
+.res-bar-bg {
+  height: 2px;
+  background: var(--surface3);
+  border-radius: 1px;
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.res-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.5s;
+}
+
+/* ---- TAB CONTENT ---- */
+#tab-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.tab-content { display: none; padding: 14px; }
+.tab-content.active { display: block; }
+
+/* ---- BOTTOM NAV ---- */
+#bottom-nav {
+  display: flex;
+  background: rgba(10,12,22,0.98);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-family: var(--font);
+  gap: 3px;
+  transition: color var(--transition), background var(--transition);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn .tab-icon { font-size: 1.3rem; }
+.tab-btn .tab-label { letter-spacing: 0.5px; }
+
+.tab-btn.active {
+  color: var(--cyan);
+}
+
+.tab-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 2px;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  border-radius: 0 0 2px 2px;
+}
+
+.tab-btn:active { background: rgba(255,255,255,0.05); }
+
+/* ---- BASE TAB ---- */
+.base-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Planet visual */
+.planet-container {
+  position: relative;
+  width: 140px; height: 140px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.planet-sphere {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  position: relative;
+  animation: planet-rotate 20s linear infinite;
+}
+
+.planet-atmosphere {
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+}
+
+.planet-ring {
+  position: absolute;
+  width: 160px; height: 40px;
+  border-radius: 50%;
+  border: 4px solid;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotateX(75deg);
+  opacity: 0.7;
+}
+
+@keyframes planet-rotate {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(10deg); }
+}
+
+.location-desc {
+  text-align: center;
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.flavor-text {
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.available-resources { width: 100%; }
+.available-resources h3 {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.resource-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.res-tag {
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background: rgba(255,255,255,0.03);
+}
+
+/* Mine Button */
+.mine-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1e3070, #0a1830);
+  border: 3px solid var(--cyan);
+  box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0,212,255,0.1);
+  cursor: pointer;
+  color: var(--text-bright);
+  transition: transform var(--transition), box-shadow var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.mine-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(0,212,255,0.15), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.mine-btn:active, .mine-btn.mining {
+  transform: scale(0.93);
+  box-shadow: var(--glow-cyan), inset 0 0 50px rgba(0,212,255,0.25);
+}
+
+.mine-btn:active::after, .mine-btn.mining::after { opacity: 1; }
+
+.mine-icon { font-size: 2.2rem; margin-bottom: 2px; }
+
+.mine-text {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--cyan);
+}
+
+.mine-sub {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.auto-prod {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.auto-label { color: var(--gold); margin-right: 8px; }
+.auto-rates { color: var(--green); }
+
+.hint-box {
+  width: 100%;
+  background: rgba(255,215,0,0.05);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+
+.secret-banner {
+  width: 100%;
+  background: rgba(0,212,255,0.08);
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--cyan);
+  text-align: center;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 5px rgba(0,212,255,0.2); }
+  50%       { box-shadow: 0 0 20px rgba(0,212,255,0.5); }
+}
+
+/* ---- RESEARCH TAB ---- */
+.active-research {
+  background: var(--surface);
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--glow-cyan);
+}
+
+.ar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.ar-header strong { color: var(--cyan); }
+
+.ar-bar-bg {
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.ar-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  border-radius: 3px;
+  transition: width 0.5s linear;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.cancel-btn {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.cancel-btn:hover { color: var(--red); border-color: var(--red); }
+
+.research-queue {
+  background: var(--surface);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.queue-item {
+  display: inline-block;
+  background: var(--surface3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin: 2px;
+  font-size: 0.72rem;
+}
+
+.tech-tier { margin-bottom: 20px; }
+
+.tier-title {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tech-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: border-color var(--transition);
+}
+
+.tech-card.done {
+  border-color: var(--green);
+  background: rgba(46,204,113,0.05);
+}
+
+.tech-card.active {
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+.tech-card.locked {
+  opacity: 0.5;
+}
+
+.tech-card.blocked {
+  opacity: 0.6;
+}
+
+.tech-icon { font-size: 1.4rem; }
+.tech-name { font-size: 0.82rem; font-weight: 700; color: var(--text-bright); }
+.tech-desc { font-size: 0.72rem; color: var(--text-dim); line-height: 1.4; }
+
+.tech-unlocks {
+  font-size: 0.68rem;
+  color: var(--purple);
+  background: rgba(155,89,182,0.1);
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.tech-cost, .build-cost, .rocket-cost { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+
+.cost-item {
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.cost-item.ok { color: var(--green); background: rgba(46,204,113,0.1); }
+.cost-item.short { color: var(--red); background: rgba(231,76,60,0.1); }
+
+.tech-status { margin-top: 4px; }
+
+.done-badge { font-size: 0.7rem; color: var(--green); }
+.active-badge { font-size: 0.7rem; color: var(--cyan); }
+.blocked-badge { font-size: 0.7rem; color: var(--text-dim); }
+
+.research-btn, .build-btn, .build-rocket-btn, .launch-target-btn {
+  margin-top: 6px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.research-btn:active, .build-btn:active, .build-rocket-btn:active { transform: scale(0.97); }
+.research-btn.disabled, .build-btn.disabled, .build-rocket-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: var(--surface3);
+  color: var(--text-dim);
+}
+
+/* ---- BUILD TAB ---- */
+.build-view h3 {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  margin-top: 14px;
+}
+
+.existing-buildings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.building-existing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  color: var(--green);
+}
+
+.building-count {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.build-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.build-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.build-card.locked { opacity: 0.5; }
+.build-card.blocked { opacity: 0.65; }
+.build-card.maxed { border-color: var(--gold); }
+
+.build-icon { font-size: 1.4rem; }
+.build-name { font-size: 0.82rem; font-weight: 700; color: var(--text-bright); }
+.build-desc { font-size: 0.7rem; color: var(--text-dim); line-height: 1.4; }
+.build-req, .rocket-req { font-size: 0.68rem; color: var(--text-dim); }
+.maxed-label { font-size: 0.7rem; color: var(--gold); font-weight: 700; margin-top: 4px; }
+.blocked-label { font-size: 0.7rem; color: var(--red); margin-top: 4px; }
+
+.count-badge {
+  font-size: 0.65rem;
+  background: var(--surface3);
+  padding: 1px 5px;
+  border-radius: 8px;
+  color: var(--gold);
+}
+
+/* ---- LAUNCH TAB ---- */
+.active-mission {
+  background: var(--surface);
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--glow-cyan);
+}
+
+.mission-title {
+  font-size: 0.75rem;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.mission-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: var(--text-bright);
+}
+
+.mission-arrow { color: var(--cyan); font-size: 1rem; animation: blink 1s step-start infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+
+.mission-rocket { font-size: 0.78rem; color: var(--text-dim); text-align: center; margin-bottom: 4px; }
+.mission-time { font-size: 0.9rem; color: var(--gold); text-align: center; margin-bottom: 10px; font-family: var(--font-mono); }
+
+.hangar-section { margin-bottom: 20px; }
+.hangar-section h3, .build-rockets h3 {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.empty-hint {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.hangar-list { display: flex; flex-direction: column; gap: 10px; }
+
+.hangar-entry {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.rocket-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rocket-icon-lg { font-size: 2rem; }
+.rocket-name { font-size: 0.85rem; font-weight: 700; color: var(--text-bright); }
+.rocket-desc { font-size: 0.72rem; color: var(--text-dim); }
+
+.launch-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.launch-target-btn {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--cyan);
+  background: rgba(0,212,255,0.1);
+  color: var(--cyan);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.launch-target-btn:hover:not(.disabled) { background: rgba(0,212,255,0.2); }
+.launch-target-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--text-dim);
+  background: transparent;
+}
+
+.no-targets { font-size: 0.75rem; color: var(--text-dim); }
+
+.rocket-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rocket-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rocket-card.locked { opacity: 0.5; }
+.rocket-icon { font-size: 1.6rem; }
+.rocket-name { font-size: 0.82rem; font-weight: 700; color: var(--text-bright); }
+.rocket-tier { font-size: 0.65rem; color: var(--purple); text-transform: uppercase; }
+
+/* ---- MAP TAB ---- */
+.galaxy-map { display: flex; flex-direction: column; gap: 20px; }
+
+.map-group {}
+.map-group-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.map-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.map-node {
+  flex: 1; min-width: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition);
+  position: relative;
+}
+
+.map-node:hover { border-color: var(--loc-color, var(--border2)); transform: translateY(-2px); }
+
+.map-node.current {
+  border-color: var(--loc-color, var(--cyan));
+  box-shadow: 0 0 15px rgba(var(--loc-color), 0.3);
+}
+
+.map-node.unknown { opacity: 0.4; cursor: default; }
+
+.map-node-icon { font-size: 1.8rem; margin-bottom: 4px; }
+.map-node-name { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); }
+.map-node-dist { font-size: 0.65rem; color: var(--text-dim); font-family: var(--font-mono); margin-top: 2px; }
+
+.here-badge {
+  position: absolute;
+  top: -8px; left: 50%; transform: translateX(-50%);
+  background: var(--cyan);
+  color: var(--bg);
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.base-badge {
+  font-size: 0.6rem;
+  color: var(--gold);
+  background: rgba(255,215,0,0.1);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.secret-badge {
+  font-size: 0.6rem;
+  color: var(--cyan);
+  background: rgba(0,212,255,0.1);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+/* ---- LOG TAB ---- */
+.log-view { display: flex; flex-direction: column; gap: 16px; }
+
+.stats-panel, .achievements-panel, .save-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.stats-panel h3, .achievements-panel h3 {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  background: var(--surface2);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.stat-item span:first-child { color: var(--text-dim); }
+.stat-item span:last-child { color: var(--cyan); font-family: var(--font-mono); }
+
+.achievement-list { display: flex; flex-direction: column; gap: 6px; }
+
+.achievement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  border: 1px solid transparent;
+}
+
+.achievement.earned { border-color: var(--gold); background: rgba(255,215,0,0.05); }
+.achievement.locked { opacity: 0.4; }
+
+.ach-icon { font-size: 1.2rem; }
+.ach-info { flex: 1; }
+.ach-name { font-size: 0.8rem; font-weight: 700; color: var(--text-bright); }
+.ach-desc { font-size: 0.7rem; color: var(--text-dim); }
+.ach-check { color: var(--gold); }
+
+.save-panel {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.save-btn, .reset-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: opacity var(--transition);
+}
+
+.save-btn { background: var(--green); color: white; }
+.reset-btn { background: var(--red); color: white; }
+.save-btn:hover, .reset-btn:hover { opacity: 0.85; }
+
+/* ---- OVERLAYS ---- */
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.overlay.active { display: flex; }
+
+.overlay-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  text-align: center;
+  position: relative;
+}
+
+/* Secret overlay */
+#secret-overlay .overlay-box {
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan), 0 0 80px rgba(0,212,255,0.1);
+}
+
+.secret-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+.secret-messages { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+
+.secret-message {
+  background: var(--surface2);
+  border-left: 3px solid var(--cyan);
+  padding: 10px 14px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.82rem;
+  color: var(--text);
+  text-align: left;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.secret-message.show { opacity: 1; transform: translateX(0); }
+
+.secret-close-btn {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: var(--glow-cyan);
+  animation: pulse-border 1s ease-in-out infinite;
+}
+
+/* Arrival overlay */
+.arrival-icon { font-size: 4rem; margin-bottom: 10px; animation: float 2s ease-in-out infinite; }
+.arrival-name { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+.arrival-dist { font-size: 0.78rem; color: var(--text-dim); font-family: var(--font-mono); margin-bottom: 12px; }
+.arrival-flavor { font-style: italic; color: var(--text-dim); margin-bottom: 16px; font-size: 0.85rem; }
+.arrival-resources { font-size: 0.78rem; color: var(--text); margin-bottom: 20px; }
+
+#arrival-overlay .overlay-box button {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Offline overlay */
+.offline-title { font-size: 1.2rem; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+.offline-time { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
+.offline-subtitle { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 10px; }
+.offline-resources { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.offline-resource {
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: var(--green);
+  text-align: left;
+}
+
+#offline-overlay .overlay-box button {
+  padding: 10px 24px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---- NOTIFICATIONS ---- */
+#notifications {
+  position: fixed;
+  top: 10px; right: 10px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 300px;
+  pointer-events: none;
+}
+
+.notification {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: auto;
+}
+
+.notification.show { opacity: 1; transform: translateX(0); }
+.notification.success { border-color: var(--green); color: var(--green); }
+.notification.error { border-color: var(--red); color: var(--red); }
+.notification.warning { border-color: var(--orange); color: var(--orange); }
+.notification.info { border-color: var(--cyan); color: var(--cyan); }
+.notification.launch { border-color: var(--purple); color: var(--purple); }
+
+.notification.achievement-popup {
+  background: var(--surface);
+  border-color: var(--gold);
+  color: var(--gold);
+  max-width: 280px;
+}
+
+.ach-popup-inner { display: flex; align-items: center; gap: 10px; }
+.ach-popup-icon { font-size: 1.5rem; }
+.ach-popup-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+.ach-popup-name { font-size: 0.85rem; font-weight: 700; }
+.ach-popup-desc { font-size: 0.72rem; opacity: 0.8; }
+
+/* ---- FLOATING TEXT ---- */
+.float-text {
+  position: fixed;
+  z-index: 150;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0);
+  transition: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+.float-text.float-up {
+  animation: float-up 1.2s ease-out forwards;
+}
+
+@keyframes float-up {
+  0%   { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; transform: translateY(-60px); }
+  100% { opacity: 0; transform: translateY(-80px); }
+}
+
+/* ---- TUTORIAL ---- */
+#tutorial-popup {
+  position: fixed;
+  bottom: 80px; left: 50%; transform: translateX(-50%);
+  z-index: 300;
+  width: calc(100% - 40px);
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius);
+  box-shadow: var(--glow-cyan), var(--shadow);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+#tutorial-popup.show { opacity: 1; pointer-events: auto; }
+
+.tutorial-inner { padding: 16px; }
+.tutorial-title { font-size: 0.9rem; font-weight: 700; color: var(--cyan); margin-bottom: 8px; }
+.tutorial-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+
+.tutorial-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tutorial-footer span { font-size: 0.72rem; color: var(--text-dim); }
+
+.tutorial-footer button {
+  padding: 8px 16px;
+  background: var(--cyan);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tutorial-highlight {
+  animation: highlight-pulse 0.8s ease-in-out 3;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 0 4px var(--cyan), var(--glow-cyan); }
+}
+
+/* ---- UTILITIES ---- */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.no-resources {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 8px;
+  font-style: italic;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 360px) {
+  .tech-grid, .build-grid, .rocket-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 540px) {
+  #app {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+}
+
+  </style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div id="particles"></div>
+<div id="splash">
+  <div class="splash-logo">🚀</div>
+  <div class="splash-title">COSMIC FRONTIER</div>
+  <div class="splash-sub">DEEP SPACE EXPLORATION</div>
+  <div class="splash-bar-bg"><div class="splash-bar-fill"></div></div>
+  <div class="splash-status">Initializing systems...</div>
+</div>
+<div id="app">
+  <div id="location-header"></div>
+  <div id="resources-bar"></div>
+  <div id="tab-area">
+    <div class="tab-content active" id="tab-base"></div>
+    <div class="tab-content" id="tab-research"></div>
+    <div class="tab-content" id="tab-build"></div>
+    <div class="tab-content" id="tab-launch"></div>
+    <div class="tab-content" id="tab-map"></div>
+    <div class="tab-content" id="tab-log"></div>
+  </div>
+  <nav id="bottom-nav">
+    <button class="tab-btn active" data-tab="base"><span class="tab-icon">🌍</span><span class="tab-label">BASE</span></button>
+    <button class="tab-btn" data-tab="research"><span class="tab-icon">🔬</span><span class="tab-label">RESEARCH</span></button>
+    <button class="tab-btn" data-tab="build"><span class="tab-icon">🏗</span><span class="tab-label">BUILD</span></button>
+    <button class="tab-btn" data-tab="launch"><span class="tab-icon">🚀</span><span class="tab-label">LAUNCH</span></button>
+    <button class="tab-btn" data-tab="map"><span class="tab-icon">🗺</span><span class="tab-label">MAP</span></button>
+    <button class="tab-btn" data-tab="log"><span class="tab-icon">📋</span><span class="tab-label">LOG</span></button>
+  </nav>
+</div>
+<div class="overlay" id="secret-overlay"><div class="overlay-box"><div id="secret-content"></div></div></div>
+<div class="overlay" id="arrival-overlay"><div class="overlay-box"><div id="arrival-content"></div></div></div>
+<div class="overlay" id="offline-overlay"><div class="overlay-box"><div id="offline-content"></div></div></div>
+<div id="notifications"></div>
+<div id="tutorial-popup"></div>
+<script>
+// ==== config.js ====
+// ============================================================
+// COSMIC FRONTIER - Game Configuration
+// All game data: locations, resources, technologies, buildings
+// ============================================================
+
+const CONFIG = {
+
+  // ---- RESOURCES ----
+  RESOURCES: {
+    iron:          { name: 'Iron',          icon: '🔩', color: '#cd7f32', desc: 'Basic structural metal' },
+    silicon:       { name: 'Silicon',       icon: '💎', color: '#a0b4c8', desc: 'Electronics and solar panels' },
+    carbon:        { name: 'Carbon',        icon: '◆',  color: '#555', desc: 'Versatile construction material' },
+    water:         { name: 'Water',         icon: '💧', color: '#4169e1', desc: 'Fuel & life support' },
+    helium3:       { name: 'Helium-3',      icon: '⚡', color: '#ffd700', desc: 'Clean fusion fuel' },
+    titanium:      { name: 'Titanium',      icon: '🔷', color: '#b0c4de', desc: 'Super-strong alloy metal' },
+    platinum:      { name: 'Platinum',      icon: '✦',  color: '#e5e4e2', desc: 'Rare catalyst' },
+    regolith:      { name: 'Regolith',      icon: '🪨', color: '#a8917a', desc: 'Lunar surface material' },
+    ice:           { name: 'Ice',           icon: '❄️',  color: '#a8d8ea', desc: 'Water ice deposits' },
+    hydrogen:      { name: 'Hydrogen',      icon: '○',  color: '#e0f0ff', desc: 'Rocket propellant' },
+    methane:       { name: 'Methane',       icon: '🌫️', color: '#88aa66', desc: 'Hydrocarbon fuel' },
+    crystals:      { name: 'Crystals',      icon: '💠', color: '#9b59b6', desc: 'Resonant cosmic crystals' },
+    nitrogen:      { name: 'Nitrogen',      icon: '🌀', color: '#aaccff', desc: 'Atmospheric gas' },
+    diamonds:      { name: 'Diamonds',      icon: '💍', color: '#b9f2ff', desc: 'Extreme pressure gem' },
+    neutronium:    { name: 'Neutronium',    icon: '⬛', color: '#222', desc: 'Ultra-dense neutron matter' },
+    exoticMatter:  { name: 'Exotic Matter', icon: '✧',  color: '#ff44ff', desc: 'Negative mass particles' },
+    darkMatter:    { name: 'Dark Matter',   icon: '◉',  color: '#330055', desc: 'Invisible binding force' },
+    alienCrystals: { name: 'Alien Crystals',icon: '⬡',  color: '#00ff88', desc: 'Ancient alien tech artifact' },
+    quantumDust:   { name: 'Quantum Dust',  icon: '✨', color: '#ff88ff', desc: 'Entangled particle clouds' },
+    antimatter:    { name: 'Antimatter',    icon: '⊛',  color: '#ff2200', desc: 'Annihilation fuel' },
+    voidEssence:   { name: 'Void Essence',  icon: '◈',  color: '#110022', desc: 'Essence of nothingness' },
+  },
+
+  // ---- LOCATIONS ----
+  LOCATIONS: {
+    earth: {
+      name: 'Earth', icon: '🌍', color: '#4a90d9', ringColor: null,
+      distance: 0, distanceUnit: 'AU',
+      description: 'Our home planet. Rich in iron and silicon.',
+      resources: ['iron', 'silicon', 'carbon', 'water'],
+      baseYield: { iron: 1.0, silicon: 0.6, carbon: 0.4, water: 0.3 },
+      unlocked: true,
+      flavorText: 'The cradle of humanity. Our journey begins here.',
+    },
+    moon: {
+      name: 'The Moon', icon: '🌕', color: '#aaaaaa', ringColor: null,
+      distance: 0.0026, distanceUnit: 'AU',
+      description: 'Earth\'s natural satellite. Contains helium-3 from solar winds.',
+      resources: ['iron', 'silicon', 'regolith', 'helium3'],
+      baseYield: { iron: 0.8, silicon: 0.5, regolith: 1.2, helium3: 0.3 },
+      unlocked: false,
+      requires: { tech: 'chemical_rockets' },
+      flavorText: 'Humanity\'s first step beyond Earth.',
+    },
+    mars: {
+      name: 'Mars', icon: '🔴', color: '#c1440e', ringColor: null,
+      distance: 1.52, distanceUnit: 'AU',
+      description: 'The Red Planet. Vast mineral reserves beneath the rusty surface.',
+      resources: ['iron', 'silicon', 'carbon', 'ice'],
+      baseYield: { iron: 1.5, silicon: 0.8, carbon: 0.7, ice: 0.5 },
+      unlocked: false,
+      requires: { tech: 'ion_propulsion' },
+      flavorText: 'The Red Planet beckons. Terraform or mine?',
+    },
+    asteroidBelt: {
+      name: 'Asteroid Belt', icon: '🪨', color: '#8b7355', ringColor: null,
+      distance: 2.7, distanceUnit: 'AU',
+      description: 'Millions of rocky bodies rich in rare metals.',
+      resources: ['iron', 'titanium', 'platinum', 'carbon'],
+      baseYield: { iron: 2.5, titanium: 1.0, platinum: 0.4, carbon: 0.8 },
+      unlocked: false,
+      requires: { tech: 'deep_space_nav' },
+      flavorText: 'Untold riches float freely here.',
+    },
+    jupiter: {
+      name: 'Jupiter', icon: '🟠', color: '#c88b3a', ringColor: null,
+      distance: 5.2, distanceUnit: 'AU',
+      description: 'The gas giant. Harvest hydrogen and helium-3 from the atmosphere.',
+      resources: ['hydrogen', 'helium3', 'ice'],
+      baseYield: { hydrogen: 3.0, helium3: 1.2, ice: 0.8 },
+      unlocked: false,
+      requires: { tech: 'nuclear_thermal' },
+      flavorText: 'The Great Red Spot swirls with ancient storms.',
+    },
+    europa: {
+      name: 'Europa', icon: '⚪', color: '#d4e8f0', ringColor: null,
+      distance: 5.2, distanceUnit: 'AU',
+      description: 'Jupiter\'s icy moon. A subsurface ocean hides beneath the ice.',
+      resources: ['ice', 'silicon', 'carbon', 'water'],
+      baseYield: { ice: 2.0, silicon: 0.6, carbon: 0.5, water: 1.5 },
+      unlocked: false,
+      requires: { base: 'jupiter' },
+      flavorText: 'Life may lurk beneath the frozen shell...',
+    },
+    saturn: {
+      name: 'Saturn', icon: '🪐', color: '#e8d5a3', ringColor: '#f0e68c',
+      distance: 9.58, distanceUnit: 'AU',
+      description: 'Ringed gas giant. The rings are rich in ice and minerals.',
+      resources: ['hydrogen', 'helium3', 'ice', 'crystals'],
+      baseYield: { hydrogen: 2.5, helium3: 1.5, ice: 2.0, crystals: 0.3 },
+      unlocked: false,
+      requires: { tech: 'antimatter_init' },
+      flavorText: 'The most beautiful planet in the solar system.',
+    },
+    titan: {
+      name: 'Titan', icon: '🟡', color: '#f4a460', ringColor: null,
+      distance: 9.58, distanceUnit: 'AU',
+      description: 'Saturn\'s largest moon. Thick atmosphere of nitrogen and methane.',
+      resources: ['nitrogen', 'methane', 'crystals', 'ice'],
+      baseYield: { nitrogen: 2.0, methane: 1.8, crystals: 0.8, ice: 1.0 },
+      unlocked: false,
+      requires: { base: 'saturn' },
+      secret: true,
+      secretThreshold: 500, // crystals mined to trigger secret
+      flavorText: 'Strange orange skies hide ancient secrets...',
+    },
+    uranus: {
+      name: 'Uranus', icon: '🔵', color: '#7de8e8', ringColor: '#5cc0c0',
+      distance: 19.2, distanceUnit: 'AU',
+      description: 'Ice giant tilted on its side. Rich in exotic ices and diamonds.',
+      resources: ['ice', 'diamonds', 'methane', 'exoticMatter'],
+      baseYield: { ice: 3.0, diamonds: 0.5, methane: 2.0, exoticMatter: 0.1 },
+      unlocked: false,
+      requires: { tech: 'quantum_propulsion' },
+      flavorText: 'Pressure here forges diamonds from carbon.',
+    },
+    neptune: {
+      name: 'Neptune', icon: '🟣', color: '#3f54ba', ringColor: '#2a3888',
+      distance: 30.1, distanceUnit: 'AU',
+      description: 'The most distant true planet. Fierce winds carry exotic matter.',
+      resources: ['ice', 'helium3', 'diamonds', 'neutronium'],
+      baseYield: { ice: 2.5, helium3: 2.0, diamonds: 0.8, neutronium: 0.2 },
+      unlocked: false,
+      requires: { tech: 'quantum_propulsion' },
+      flavorText: 'Supersonic winds of 2100 km/h scour the surface.',
+    },
+    kuiperBelt: {
+      name: 'Kuiper Belt', icon: '🌌', color: '#6a8bad', ringColor: null,
+      distance: 40, distanceUnit: 'AU',
+      description: 'The outer solar system belt. Gateway to interstellar space.',
+      resources: ['ice', 'platinum', 'exoticMatter', 'quantumDust'],
+      baseYield: { ice: 2.0, platinum: 1.0, exoticMatter: 0.5, quantumDust: 0.2 },
+      unlocked: false,
+      requires: { tech: 'warp_coils' },
+      secret: true,
+      secretThreshold: 200,
+      flavorText: 'At the edge of the solar system, reality grows thin.',
+    },
+    proxima: {
+      name: 'Proxima Centauri', icon: '⭐', color: '#ff6b6b', ringColor: null,
+      distance: 4.24, distanceUnit: 'LY',
+      description: 'The nearest star to our Sun. An alien system awaits.',
+      resources: ['alienCrystals', 'exoticMatter', 'quantumDust', 'darkMatter'],
+      baseYield: { alienCrystals: 1.5, exoticMatter: 1.0, quantumDust: 0.8, darkMatter: 0.3 },
+      unlocked: false,
+      requires: { tech: 'warp_drive' },
+      flavorText: 'Another sun. Another hope. The stars are within reach.',
+    },
+    proximaB: {
+      name: 'Proxima b', icon: '🌑', color: '#882200', ringColor: null,
+      distance: 4.24, distanceUnit: 'LY',
+      description: 'A rocky world in Proxima\'s habitable zone.',
+      resources: ['alienCrystals', 'iron', 'darkMatter', 'voidEssence'],
+      baseYield: { alienCrystals: 2.0, iron: 3.0, darkMatter: 0.5, voidEssence: 0.1 },
+      unlocked: false,
+      requires: { base: 'proxima' },
+      secret: true,
+      secretThreshold: 100,
+      flavorText: 'Ancient ruins cover the surface. Someone was here before us.',
+    },
+    alphaCentauri: {
+      name: 'Alpha Centauri', icon: '🌟', color: '#ffdd44', ringColor: null,
+      distance: 4.37, distanceUnit: 'LY',
+      description: 'A binary star system. Two suns, immense energy available.',
+      resources: ['darkMatter', 'antimatter', 'quantumDust', 'voidEssence'],
+      baseYield: { darkMatter: 1.0, antimatter: 0.5, quantumDust: 1.5, voidEssence: 0.3 },
+      unlocked: false,
+      requires: { tech: 'hyperdrive' },
+      flavorText: 'Two suns bathe this system in golden light.',
+    },
+    voidNexus: {
+      name: 'The Void Nexus', icon: '🌀', color: '#220033', ringColor: '#440066',
+      distance: 1000, distanceUnit: 'LY',
+      description: 'A tear in spacetime itself. The ultimate frontier.',
+      resources: ['voidEssence', 'antimatter', 'darkMatter', 'alienCrystals'],
+      baseYield: { voidEssence: 2.0, antimatter: 1.5, darkMatter: 2.0, alienCrystals: 1.0 },
+      unlocked: false,
+      requires: { tech: 'void_navigation' },
+      flavorText: 'Beyond this point, the laws of physics are... suggestions.',
+    },
+  },
+
+  // ---- TECHNOLOGIES ----
+  TECHS: {
+    // === TIER 0: Earth Foundation ===
+    basic_mining: {
+      name: 'Advanced Mining Drills',
+      tier: 0, icon: '⛏',
+      desc: 'Improved drill heads increase mining speed by 75%.',
+      cost: { iron: 30, silicon: 10 },
+      researchTime: 8,
+      effect: { miningMultiplier: 1.75 },
+      unlocks: [],
+      requires: [],
+    },
+    solar_panels: {
+      name: 'Solar Panels',
+      tier: 0, icon: '☀️',
+      desc: 'Harness solar energy to power auto-miners.',
+      cost: { iron: 40, silicon: 30 },
+      researchTime: 12,
+      effect: { enableAutoMine: true },
+      unlocks: ['auto_miner'],
+      requires: ['basic_mining'],
+    },
+    chemical_rockets: {
+      name: 'Chemical Rockets',
+      tier: 0, icon: '🚀',
+      desc: 'Basic rocket propulsion. Enables travel to the Moon.',
+      cost: { iron: 80, silicon: 40, carbon: 20 },
+      researchTime: 30,
+      effect: {},
+      unlocks: ['rocket_basic'],
+      requires: ['solar_panels'],
+      unlockLocation: 'moon',
+    },
+
+    // === TIER 1: Inner Solar System ===
+    fuel_refinement: {
+      name: 'Fuel Refinement',
+      tier: 1, icon: '⚗️',
+      desc: 'Refine helium-3 for better fuel efficiency. Mining yields +50%.',
+      cost: { iron: 120, silicon: 80, helium3: 20 },
+      researchTime: 45,
+      effect: { miningMultiplier: 1.5 },
+      unlocks: [],
+      requires: ['chemical_rockets'],
+    },
+    ion_propulsion: {
+      name: 'Ion Propulsion',
+      tier: 1, icon: '⚡',
+      desc: 'Electrically accelerated ions for efficient deep space travel. Unlocks Mars.',
+      cost: { iron: 200, silicon: 150, helium3: 50 },
+      researchTime: 60,
+      effect: {},
+      unlocks: ['rocket_ion'],
+      requires: ['fuel_refinement'],
+      unlockLocation: 'mars',
+    },
+    base_construction: {
+      name: 'Base Construction',
+      tier: 1, icon: '🏗',
+      desc: 'Build permanent outposts on other worlds.',
+      cost: { iron: 150, silicon: 100, carbon: 80 },
+      researchTime: 50,
+      effect: { enableBases: true },
+      unlocks: ['base_module'],
+      requires: ['chemical_rockets'],
+    },
+    deep_space_nav: {
+      name: 'Deep Space Navigation',
+      tier: 1, icon: '🗺',
+      desc: 'Advanced navigation for the outer solar system. Unlocks Asteroid Belt.',
+      cost: { iron: 300, silicon: 200, carbon: 100, helium3: 80 },
+      researchTime: 90,
+      effect: {},
+      unlocks: ['rocket_heavy'],
+      requires: ['ion_propulsion', 'base_construction'],
+      unlockLocation: 'asteroidBelt',
+    },
+
+    // === TIER 2: Outer Solar System ===
+    nuclear_thermal: {
+      name: 'Nuclear Thermal Drive',
+      tier: 2, icon: '☢️',
+      desc: 'Nuclear-heated propellant for high thrust. Unlocks Jupiter.',
+      cost: { iron: 500, titanium: 200, helium3: 150, silicon: 300 },
+      researchTime: 120,
+      effect: { miningMultiplier: 2.0 },
+      unlocks: ['rocket_nuclear'],
+      requires: ['deep_space_nav'],
+      unlockLocation: 'jupiter',
+    },
+    antimatter_init: {
+      name: 'Antimatter Research',
+      tier: 2, icon: '⊛',
+      desc: 'Initial studies into antimatter production. Unlocks Saturn.',
+      cost: { titanium: 400, platinum: 100, helium3: 300, silicon: 500 },
+      researchTime: 180,
+      effect: {},
+      unlocks: ['rocket_antimatter_basic'],
+      requires: ['nuclear_thermal'],
+      unlockLocation: 'saturn',
+    },
+    cryo_tech: {
+      name: 'Cryogenic Technology',
+      tier: 2, icon: '❄️',
+      desc: 'Store resources in cryogenic tanks. Storage capacity ×5.',
+      cost: { titanium: 300, ice: 200, silicon: 400 },
+      researchTime: 150,
+      effect: { storageMultiplier: 5 },
+      unlocks: [],
+      requires: ['nuclear_thermal'],
+    },
+
+    // === TIER 3: Secret of Titan (Unlocked by Titan discovery) ===
+    quantum_propulsion: {
+      name: 'Quantum Propulsion',
+      tier: 3, icon: '🌀',
+      desc: '[ CLASSIFIED - TITAN DISCOVERY ] Exploit quantum tunneling for FTL-adjacent travel. Unlocks outer planets.',
+      cost: { crystals: 500, helium3: 1000, titanium: 800, exoticMatter: 50 },
+      researchTime: 300,
+      effect: { miningMultiplier: 3.0 },
+      unlocks: ['rocket_quantum'],
+      requires: [], // unlocked by event
+      locked: true,
+      unlockLocation: 'uranus',
+      unlockLocationAlt: 'neptune',
+    },
+    warp_coils: {
+      name: 'Warp Field Coils',
+      tier: 3, icon: '〰️',
+      desc: '[ CLASSIFIED ] Coils that distort spacetime around a vessel. Unlocks Kuiper Belt.',
+      cost: { crystals: 800, exoticMatter: 200, diamonds: 100, quantumDust: 50 },
+      researchTime: 360,
+      effect: {},
+      unlocks: ['rocket_warp'],
+      requires: ['quantum_propulsion'],
+      locked: true,
+      unlockLocation: 'kuiperBelt',
+    },
+    warp_drive: {
+      name: 'Warp Drive',
+      tier: 3, icon: '🚀',
+      desc: '[ CLASSIFIED ] Full warp drive. Faster-than-light travel. Unlocks nearby stars.',
+      cost: { exoticMatter: 500, quantumDust: 300, crystals: 1000, darkMatter: 100 },
+      researchTime: 600,
+      effect: { miningMultiplier: 4.0 },
+      unlocks: ['rocket_warp_full'],
+      requires: ['warp_coils'],
+      locked: true,
+      unlockLocation: 'proxima',
+    },
+
+    // === TIER 4: Interstellar (Unlocked by Kuiper Belt secret) ===
+    dark_matter_engine: {
+      name: 'Dark Matter Engine',
+      tier: 4, icon: '◉',
+      desc: '[ BEYOND HUMAN SCIENCE ] Harness dark matter for virtually unlimited propulsion.',
+      cost: { darkMatter: 500, antimatter: 200, voidEssence: 50, alienCrystals: 300 },
+      researchTime: 900,
+      effect: { miningMultiplier: 5.0 },
+      unlocks: [],
+      requires: ['warp_drive'],
+      locked: true,
+    },
+    hyperdrive: {
+      name: 'Hyperdrive',
+      tier: 4, icon: '✦',
+      desc: '[ BEYOND HUMAN SCIENCE ] Instantaneous jumps across light-years.',
+      cost: { darkMatter: 800, antimatter: 400, alienCrystals: 600, quantumDust: 500 },
+      researchTime: 1200,
+      effect: {},
+      unlocks: ['rocket_hyper'],
+      requires: ['dark_matter_engine'],
+      locked: true,
+      unlockLocation: 'alphaCentauri',
+    },
+
+    // === TIER 5: Void (Unlocked by Proxima b secret) ===
+    void_navigation: {
+      name: 'Void Navigation',
+      tier: 5, icon: '◈',
+      desc: '[ ANCIENT ALIEN KNOWLEDGE ] Navigate the fabric of space itself. The final frontier.',
+      cost: { voidEssence: 1000, darkMatter: 1000, antimatter: 800, alienCrystals: 1000 },
+      researchTime: 1800,
+      effect: { miningMultiplier: 10.0 },
+      unlocks: ['rocket_void'],
+      requires: ['hyperdrive'],
+      locked: true,
+      unlockLocation: 'voidNexus',
+    },
+  },
+
+  // ---- ROCKETS ----
+  ROCKETS: {
+    rocket_basic: {
+      name: 'Chemical Rocket',
+      icon: '🚀', tier: 1,
+      desc: 'Basic chemical propulsion. Short range.',
+      cost: { iron: 150, silicon: 80, carbon: 40 },
+      buildTime: 60,
+      range: ['moon'],
+      requires: 'chemical_rockets',
+    },
+    rocket_ion: {
+      name: 'Ion Drive Ship',
+      icon: '⚡', tier: 2,
+      desc: 'Efficient ion drive for inner solar system travel.',
+      cost: { iron: 300, silicon: 200, helium3: 80, titanium: 50 },
+      buildTime: 120,
+      range: ['moon', 'mars'],
+      requires: 'ion_propulsion',
+    },
+    rocket_heavy: {
+      name: 'Heavy Lifter',
+      icon: '🛸', tier: 2,
+      desc: 'Massive cargo rocket for the asteroid belt and beyond.',
+      cost: { iron: 600, titanium: 200, helium3: 150, silicon: 300 },
+      buildTime: 180,
+      range: ['moon', 'mars', 'asteroidBelt'],
+      requires: 'deep_space_nav',
+    },
+    rocket_nuclear: {
+      name: 'Nuclear Drive',
+      icon: '☢️', tier: 3,
+      desc: 'Nuclear thermal drive for the outer solar system.',
+      cost: { titanium: 500, helium3: 300, platinum: 100, silicon: 400 },
+      buildTime: 240,
+      range: ['moon','mars','asteroidBelt','jupiter','europa'],
+      requires: 'nuclear_thermal',
+    },
+    rocket_antimatter_basic: {
+      name: 'Antimatter Probe',
+      icon: '⊛', tier: 3,
+      desc: 'Antimatter-powered for the entire solar system.',
+      cost: { titanium: 800, helium3: 500, platinum: 300, crystals: 100 },
+      buildTime: 300,
+      range: ['moon','mars','asteroidBelt','jupiter','europa','saturn','titan'],
+      requires: 'antimatter_init',
+    },
+    rocket_quantum: {
+      name: 'Quantum Jumper',
+      icon: '🌀', tier: 4,
+      desc: 'Uses quantum tunneling to skip vast distances.',
+      cost: { crystals: 800, exoticMatter: 200, titanium: 1000, quantumDust: 100 },
+      buildTime: 600,
+      range: ['moon','mars','asteroidBelt','jupiter','europa','saturn','titan','uranus','neptune'],
+      requires: 'quantum_propulsion',
+    },
+    rocket_warp: {
+      name: 'Warp Cruiser',
+      icon: '〰️', tier: 4,
+      desc: 'Warp field generator for near-FTL travel.',
+      cost: { exoticMatter: 500, crystals: 1000, diamonds: 200, quantumDust: 300 },
+      buildTime: 900,
+      range: ['moon','mars','asteroidBelt','jupiter','europa','saturn','titan','uranus','neptune','kuiperBelt'],
+      requires: 'warp_coils',
+    },
+    rocket_warp_full: {
+      name: 'Warp Drive Flagship',
+      icon: '🌟', tier: 5,
+      desc: 'Full warp capability. The stars are within reach.',
+      cost: { exoticMatter: 1500, darkMatter: 300, quantumDust: 800, alienCrystals: 200 },
+      buildTime: 1800,
+      range: ['moon','mars','asteroidBelt','jupiter','europa','saturn','titan','uranus','neptune','kuiperBelt','proxima','proximaB'],
+      requires: 'warp_drive',
+    },
+    rocket_hyper: {
+      name: 'Hyperdrive Vessel',
+      icon: '✦', tier: 5,
+      desc: 'Instant jumps across light-years.',
+      cost: { darkMatter: 1000, antimatter: 500, alienCrystals: 800, voidEssence: 100 },
+      buildTime: 3600,
+      range: ['moon','mars','asteroidBelt','jupiter','europa','saturn','titan','uranus','neptune','kuiperBelt','proxima','proximaB','alphaCentauri'],
+      requires: 'hyperdrive',
+    },
+    rocket_void: {
+      name: 'Void Ship',
+      icon: '◈', tier: 6,
+      desc: 'Navigates through the Void itself. True cosmic exploration.',
+      cost: { voidEssence: 2000, antimatter: 1000, darkMatter: 2000, alienCrystals: 1500 },
+      buildTime: 7200,
+      range: null, // Everywhere
+      requires: 'void_navigation',
+    },
+  },
+
+  // ---- BUILDINGS ----
+  BUILDINGS: {
+    auto_miner: {
+      name: 'Auto-Miner',
+      icon: '🤖',
+      desc: 'Automatically mines resources over time.',
+      costBase: { iron: 60, silicon: 30 },
+      costScale: 1.5, // Each additional costs 1.5x more
+      productionMultiplier: 0.2, // 20% of click yield per second
+      requires: 'solar_panels',
+      maxPerLocation: 10,
+    },
+    base_module: {
+      name: 'Base Module',
+      icon: '🏗',
+      desc: 'Establishes a permanent outpost. Enables auto-mining at this location.',
+      costBase: { iron: 200, silicon: 150, carbon: 100 },
+      costScale: 2.0,
+      requires: 'base_construction',
+      maxPerLocation: 1,
+      isBase: true,
+    },
+    refinery: {
+      name: 'Refinery',
+      icon: '⚗️',
+      desc: 'Refines raw materials into purer forms. +100% yield on all resources here.',
+      costBase: { iron: 300, titanium: 100, silicon: 200 },
+      costScale: 1.8,
+      productionMultiplier: 2.0,
+      requires: 'fuel_refinement',
+      maxPerLocation: 3,
+      requiresBase: true,
+    },
+    research_lab: {
+      name: 'Research Lab',
+      icon: '🔬',
+      desc: 'Remote research laboratory. Speeds up all research by 10% per lab.',
+      costBase: { silicon: 400, iron: 200, carbon: 200 },
+      costScale: 2.5,
+      researchSpeedBonus: 0.1,
+      requires: 'base_construction',
+      maxPerLocation: 5,
+      requiresBase: true,
+    },
+    deep_drill: {
+      name: 'Deep Drill',
+      icon: '🔩',
+      desc: 'Drills deep beneath the surface for bonus rare resources.',
+      costBase: { titanium: 200, iron: 400, helium3: 100 },
+      costScale: 2.0,
+      rareResourceBonus: 0.5,
+      requires: 'deep_space_nav',
+      maxPerLocation: 3,
+      requiresBase: true,
+    },
+    signal_array: {
+      name: 'Signal Array',
+      icon: '📡',
+      desc: 'Scans for anomalies and secrets. Required for secret discoveries.',
+      costBase: { silicon: 500, titanium: 300, helium3: 200 },
+      costScale: 2.0,
+      requires: 'deep_space_nav',
+      maxPerLocation: 1,
+      requiresBase: true,
+      enablesSecrets: true,
+    },
+    fusion_reactor: {
+      name: 'Fusion Reactor',
+      icon: '⚡',
+      desc: 'Helium-3 fusion reactor. Powers everything and doubles output.',
+      costBase: { helium3: 300, titanium: 500, platinum: 100 },
+      costScale: 3.0,
+      productionMultiplier: 3.0,
+      requires: 'nuclear_thermal',
+      maxPerLocation: 2,
+      requiresBase: true,
+    },
+    quantum_transmitter: {
+      name: 'Quantum Transmitter',
+      icon: '🌀',
+      desc: 'Transmits resources instantly via quantum entanglement.',
+      costBase: { crystals: 300, exoticMatter: 100, quantumDust: 50 },
+      costScale: 2.0,
+      enablesAutoTransfer: true,
+      requires: 'quantum_propulsion',
+      maxPerLocation: 1,
+      requiresBase: true,
+    },
+  },
+
+  // ---- SECRETS / EVENTS ----
+  SECRETS: {
+    titan_signal: {
+      location: 'titan',
+      trigger: 'crystals_mined',
+      threshold: 500,
+      requiresBuilding: 'signal_array',
+      title: '📡 ANOMALOUS SIGNAL DETECTED',
+      messages: [
+        'Your signal array on Titan is picking up a structured electromagnetic pattern...',
+        'The pattern is non-random. It repeats with mathematical precision.',
+        'Cross-referencing with known languages and mathematical systems...',
+        '⚠️ MATCH FOUND: The signal encodes advanced physics equations.',
+        '🔓 DECODING COMPLETE: QUANTUM ENTANGLEMENT PROPULSION PROTOCOL',
+        'The equations describe a method to exploit quantum tunneling for propulsion.',
+        'This technology did not originate from Earth. Someone left this for us.',
+        '🌌 NEW TECHNOLOGIES UNLOCKED: Quantum Propulsion, Warp Coils, Warp Drive',
+      ],
+      unlockTechs: ['quantum_propulsion', 'warp_coils', 'warp_drive'],
+      reward: { crystals: 1000, exoticMatter: 50 },
+    },
+    kuiper_anomaly: {
+      location: 'kuiperBelt',
+      trigger: 'quantumDust_mined',
+      threshold: 200,
+      requiresBuilding: 'signal_array',
+      title: '🌌 SPACETIME ANOMALY DETECTED',
+      messages: [
+        'Your sensors at the Kuiper Belt detect an impossible reading...',
+        'Space itself seems... thinner here. The boundary between dimensions is weak.',
+        'Quantum dust concentrations form geometric patterns spanning thousands of kilometers.',
+        '🔭 ANALYSIS: This is not a natural formation.',
+        'The patterns encode dark matter manipulation techniques.',
+        'A second alien civilization? Or the same one, leaving more breadcrumbs?',
+        '🔓 DECODED: DARK MATTER ENGINE and HYPERDRIVE schematics received.',
+        '🌟 NEW TECHNOLOGIES UNLOCKED: Dark Matter Engine, Hyperdrive',
+      ],
+      unlockTechs: ['dark_matter_engine', 'hyperdrive'],
+      reward: { darkMatter: 200, alienCrystals: 100 },
+    },
+    proxima_ruins: {
+      location: 'proximaB',
+      trigger: 'alienCrystals_mined',
+      threshold: 100,
+      requiresBuilding: 'signal_array',
+      title: '👾 ALIEN RUINS DISCOVERED',
+      messages: [
+        'Surface scans of Proxima b reveal massive geometric structures...',
+        'They are ancient. Carbon dating suggests 2 billion years old.',
+        'Inside the largest structure: a library, encoded in pure mathematics.',
+        '📖 The builders called themselves the Architects of the Void.',
+        'They traveled between galaxies using... the Void itself.',
+        'A substrate beneath normal spacetime, accessible through pure mathematics.',
+        '🔓 VOID NAVIGATION PROTOCOLS TRANSFERRED TO YOUR SYSTEMS.',
+        '◈ THE FINAL FRONTIER AWAITS. NEW TECHNOLOGY UNLOCKED: Void Navigation',
+      ],
+      unlockTechs: ['void_navigation'],
+      reward: { voidEssence: 200, antimatter: 100 },
+    },
+  },
+
+  // ---- ACHIEVEMENTS ----
+  ACHIEVEMENTS: [
+    { id: 'first_mine', name: 'First Strike', desc: 'Mine your first resource.', icon: '⛏', trigger: 'totalMined', value: 1 },
+    { id: 'moon_landing', name: 'One Small Step', desc: 'Reach the Moon.', icon: '🌕', trigger: 'location', value: 'moon' },
+    { id: 'mars_arrival', name: 'Red Pioneer', desc: 'Set foot on Mars.', icon: '🔴', trigger: 'location', value: 'mars' },
+    { id: 'first_base', name: 'Home Away From Home', desc: 'Build your first off-world base.', icon: '🏗', trigger: 'basesBuilt', value: 1 },
+    { id: 'titan_secret', name: 'The Signal', desc: 'Discover the secret of Titan.', icon: '📡', trigger: 'secret', value: 'titan_signal' },
+    { id: 'warp_tech', name: 'Warp Factor One', desc: 'Unlock warp drive technology.', icon: '🌀', trigger: 'tech', value: 'warp_drive' },
+    { id: 'proxima', name: 'Interstellar', desc: 'Reach Proxima Centauri.', icon: '⭐', trigger: 'location', value: 'proxima' },
+    { id: 'alien_ruins', name: 'Ancient Architects', desc: 'Discover the alien ruins on Proxima b.', icon: '👾', trigger: 'secret', value: 'proxima_ruins' },
+    { id: 'void_nexus', name: 'Into the Void', desc: 'Reach the Void Nexus.', icon: '🌀', trigger: 'location', value: 'voidNexus' },
+    { id: 'resource_1k', name: 'Thousand Fold', desc: 'Mine 1,000 of any resource.', icon: '💰', trigger: 'singleResource', value: 1000 },
+    { id: 'resource_100k', name: 'Industrial Might', desc: 'Mine 100,000 total resources.', icon: '🏭', trigger: 'totalMined', value: 100000 },
+    { id: 'all_solar', name: 'Solar Sovereign', desc: 'Establish bases on all solar system bodies.', icon: '🌞', trigger: 'basesCount', value: 8 },
+  ],
+
+  // ---- GAME SETTINGS ----
+  SETTINGS: {
+    saveInterval: 10000,      // Auto-save every 10 seconds
+    tickRate: 100,            // Game tick every 100ms (10 per second)
+    baseStorage: 500,         // Default resource storage
+    clickParticles: 8,        // Number of particles on click
+    notificationDuration: 4000, // How long notifications show (ms)
+    researchLabSpeedBonus: 0.1, // 10% faster per lab
+  },
+};
+
+
+// ==== state.js ====
+// ============================================================
+// COSMIC FRONTIER - Game State
+// Save/load, state initialization, and state utilities
+// ============================================================
+
+const State = (() => {
+  const SAVE_KEY = 'cosmicFrontier_save';
+  const VERSION = '1.0.0';
+
+  // Default state factory
+  function createDefault() {
+    return {
+      version: VERSION,
+      lastSave: Date.now(),
+      playTime: 0,
+
+      // Resources: { resourceId: amount }
+      resources: { iron: 10, silicon: 5 },
+
+      // Per-location data
+      locations: {
+        earth: {
+          id: 'earth',
+          visited: true,
+          baseBuilt: false,
+          buildings: {},      // { buildingId: count }
+          totalMined: {},     // { resourceId: total }
+          secretTriggered: false,
+          signalArrayBuilt: false,
+        }
+      },
+
+      // Current active location (where player is viewing)
+      currentLocation: 'earth',
+
+      // Travel/mission queue
+      activeMission: null, // { from, to, rocketId, startTime, duration, purpose }
+
+      // Research
+      research: {
+        completed: [],     // [techId, ...]
+        active: null,      // { techId, startTime, duration }
+        queue: [],         // [techId, ...] (future queue)
+      },
+
+      // Built rockets (in hangar)
+      hangar: [],          // [{ id, rocketId, built: timestamp }]
+      nextHangarId: 1,
+
+      // Missions completed
+      missionsCompleted: [],
+
+      // Secrets discovered
+      secretsFound: [],
+
+      // Achievements earned
+      achievements: [],
+
+      // UI state
+      ui: {
+        activeTab: 'base',
+        notifications: [],
+        tutorialStep: 0,
+        tutorialDone: false,
+      },
+
+      // Statistics
+      stats: {
+        totalMined: 0,
+        totalLaunches: 0,
+        totalResearched: 0,
+        basesBuilt: 0,
+        secretsFound: 0,
+        locationsVisited: 1,
+        playTime: 0,
+      },
+    };
+  }
+
+  let _state = null;
+
+  function init() {
+    const saved = load();
+    if (saved) {
+      _state = migrate(saved);
+    } else {
+      _state = createDefault();
+    }
+    return _state;
+  }
+
+  function get() {
+    return _state;
+  }
+
+  function save() {
+    try {
+      _state.lastSave = Date.now();
+      localStorage.setItem(SAVE_KEY, JSON.stringify(_state));
+    } catch (e) {
+      console.warn('Save failed:', e);
+    }
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('Load failed:', e);
+      return null;
+    }
+  }
+
+  function reset() {
+    localStorage.removeItem(SAVE_KEY);
+    _state = createDefault();
+    return _state;
+  }
+
+  function migrate(saved) {
+    // Version migration - for now just return as-is with defaults filled in
+    const def = createDefault();
+    return deepMerge(def, saved);
+  }
+
+  function deepMerge(target, source) {
+    const result = Object.assign({}, target);
+    for (const key in source) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    return result;
+  }
+
+  // ---- Location helpers ----
+  function getLocation(locId) {
+    const s = _state;
+    if (!s.locations[locId]) {
+      s.locations[locId] = {
+        id: locId,
+        visited: false,
+        baseBuilt: false,
+        buildings: {},
+        totalMined: {},
+        secretTriggered: false,
+        signalArrayBuilt: false,
+      };
+    }
+    return s.locations[locId];
+  }
+
+  function visitLocation(locId) {
+    const loc = getLocation(locId);
+    if (!loc.visited) {
+      loc.visited = true;
+      _state.stats.locationsVisited++;
+    }
+  }
+
+  // ---- Resource helpers ----
+  function getResource(resId) {
+    return _state.resources[resId] || 0;
+  }
+
+  function addResource(resId, amount) {
+    if (!_state.resources[resId]) _state.resources[resId] = 0;
+    _state.resources[resId] = Math.max(0, _state.resources[resId] + amount);
+    _state.stats.totalMined += amount;
+  }
+
+  function spendResources(costs) {
+    // Check affordability first
+    for (const [res, amount] of Object.entries(costs)) {
+      if (getResource(res) < amount) return false;
+    }
+    // Spend
+    for (const [res, amount] of Object.entries(costs)) {
+      _state.resources[res] -= amount;
+    }
+    return true;
+  }
+
+  function canAfford(costs) {
+    for (const [res, amount] of Object.entries(costs)) {
+      if (getResource(res) < amount) return false;
+    }
+    return true;
+  }
+
+  // ---- Tech helpers ----
+  function hasResearched(techId) {
+    return _state.research.completed.includes(techId);
+  }
+
+  function completeResearch(techId) {
+    if (!hasResearched(techId)) {
+      _state.research.completed.push(techId);
+      _state.stats.totalResearched++;
+    }
+    _state.research.active = null;
+  }
+
+  function unlockTech(techId) {
+    // Force-unlock a tech (from secrets)
+    const tech = CONFIG.TECHS[techId];
+    if (tech) {
+      tech.locked = false;
+    }
+  }
+
+  function getMiningMultiplier() {
+    let mult = 1.0;
+    for (const techId of _state.research.completed) {
+      const tech = CONFIG.TECHS[techId];
+      if (tech && tech.effect && tech.effect.miningMultiplier) {
+        mult *= tech.effect.miningMultiplier;
+      }
+    }
+    return mult;
+  }
+
+  function getResearchSpeedMultiplier() {
+    let mult = 1.0;
+    // Count research labs across all locations
+    for (const locData of Object.values(_state.locations)) {
+      const labCount = locData.buildings['research_lab'] || 0;
+      mult += labCount * CONFIG.SETTINGS.researchLabSpeedBonus;
+    }
+    return mult;
+  }
+
+  function getStorageMax(resId) {
+    let base = CONFIG.SETTINGS.baseStorage;
+    // Cryo tech multiplier
+    if (hasResearched('cryo_tech')) base *= 5;
+    return base;
+  }
+
+  // ---- Building helpers ----
+  function getBuildingCount(locId, buildingId) {
+    const loc = getLocation(locId);
+    return loc.buildings[buildingId] || 0;
+  }
+
+  function addBuilding(locId, buildingId) {
+    const loc = getLocation(locId);
+    if (!loc.buildings[buildingId]) loc.buildings[buildingId] = 0;
+    loc.buildings[buildingId]++;
+    if (buildingId === 'base_module') {
+      loc.baseBuilt = true;
+      _state.stats.basesBuilt++;
+    }
+    if (buildingId === 'signal_array') {
+      loc.signalArrayBuilt = true;
+    }
+  }
+
+  // ---- Hangar helpers ----
+  function addToHangar(rocketId) {
+    const entry = {
+      id: _state.nextHangarId++,
+      rocketId,
+      built: Date.now(),
+    };
+    _state.hangar.push(entry);
+    return entry;
+  }
+
+  function removeFromHangar(hangarId) {
+    const idx = _state.hangar.findIndex(r => r.id === hangarId);
+    if (idx >= 0) {
+      _state.hangar.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  // ---- Getters for location productivity ----
+  function getLocationProduction(locId) {
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locState = getLocation(locId);
+    if (!locConfig || !locState.baseBuilt) return {};
+
+    const baseYield = locConfig.baseYield || {};
+    const autoMinerCount = getBuildingCount(locId, 'auto_miner');
+    const refineryCount = getBuildingCount(locId, 'refinery');
+    const fusionCount = getBuildingCount(locId, 'fusion_reactor');
+    const miningMult = getMiningMultiplier();
+
+    const refineryBonus = refineryCount > 0 ? Math.pow(2.0, refineryCount) : 1.0;
+    const fusionBonus = fusionCount > 0 ? Math.pow(3.0, fusionCount) : 1.0;
+
+    const production = {};
+    for (const [res, baseRate] of Object.entries(baseYield)) {
+      const autoMinerRate = autoMinerCount * CONFIG.BUILDINGS.auto_miner.productionMultiplier;
+      production[res] = baseRate * autoMinerRate * miningMult * refineryBonus * fusionBonus;
+    }
+    return production;
+  }
+
+  // ---- Achievement helpers ----
+  function grantAchievement(achievementId) {
+    if (!_state.achievements.includes(achievementId)) {
+      _state.achievements.push(achievementId);
+      return true;
+    }
+    return false;
+  }
+
+  function hasAchievement(achievementId) {
+    return _state.achievements.includes(achievementId);
+  }
+
+  return {
+    init, get, save, load, reset,
+    getLocation, visitLocation,
+    getResource, addResource, spendResources, canAfford,
+    hasResearched, completeResearch, unlockTech,
+    getMiningMultiplier, getResearchSpeedMultiplier, getStorageMax,
+    getBuildingCount, addBuilding,
+    addToHangar, removeFromHangar,
+    getLocationProduction,
+    grantAchievement, hasAchievement,
+  };
+})();
+
+
+// ==== engine.js ====
+// ============================================================
+// COSMIC FRONTIER - Game Engine
+// Main game loop, auto-production, mission timers, events
+// ============================================================
+
+const Engine = (() => {
+  let lastTick = 0;
+  let tickInterval = null;
+  let saveInterval = null;
+  let accumulatedTime = 0;
+
+  function start() {
+    lastTick = Date.now();
+    tickInterval = setInterval(tick, CONFIG.SETTINGS.tickRate);
+    saveInterval = setInterval(() => State.save(), CONFIG.SETTINGS.saveInterval);
+  }
+
+  function stop() {
+    clearInterval(tickInterval);
+    clearInterval(saveInterval);
+  }
+
+  function tick() {
+    const now = Date.now();
+    const dt = (now - lastTick) / 1000; // seconds
+    lastTick = now;
+
+    const state = State.get();
+    state.stats.playTime = (state.stats.playTime || 0) + dt;
+
+    // Process auto-production at all bases
+    processProduction(dt);
+
+    // Process active research
+    processResearch(dt);
+
+    // Process active mission
+    processMission(dt);
+
+    // Check for secrets
+    checkSecrets();
+
+    // Check achievements
+    checkAchievements();
+
+    // Update UI
+    if (window.UI) UI.tick(dt);
+  }
+
+  function processProduction(dt) {
+    const state = State.get();
+
+    for (const [locId, locData] of Object.entries(state.locations)) {
+      if (!locData.baseBuilt) continue;
+
+      const production = State.getLocationProduction(locId);
+      for (const [res, ratePerSec] of Object.entries(production)) {
+        if (ratePerSec > 0) {
+          const gained = ratePerSec * dt;
+          const max = State.getStorageMax(res);
+          const current = State.getResource(res);
+          const canAdd = Math.min(gained, max - current);
+          if (canAdd > 0) {
+            State.addResource(res, canAdd);
+            // Track per-location mined
+            if (!locData.totalMined[res]) locData.totalMined[res] = 0;
+            locData.totalMined[res] += canAdd;
+          }
+        }
+      }
+    }
+  }
+
+  function processResearch(dt) {
+    const state = State.get();
+    const active = state.research.active;
+    if (!active) return;
+
+    const elapsed = (Date.now() - active.startTime) / 1000;
+    const tech = CONFIG.TECHS[active.techId];
+    if (!tech) return;
+
+    const speedMult = State.getResearchSpeedMultiplier();
+    const adjustedDuration = tech.researchTime / speedMult;
+
+    if (elapsed >= adjustedDuration) {
+      // Research complete!
+      State.completeResearch(active.techId);
+
+      // Apply effects
+      applyTechEffects(active.techId);
+
+      // Unlock location if applicable
+      const unlockLoc = tech.unlockLocation;
+      if (unlockLoc && CONFIG.LOCATIONS[unlockLoc]) {
+        CONFIG.LOCATIONS[unlockLoc].unlocked = true;
+      }
+      if (tech.unlockLocationAlt && CONFIG.LOCATIONS[tech.unlockLocationAlt]) {
+        CONFIG.LOCATIONS[tech.unlockLocationAlt].unlocked = true;
+      }
+
+      UI.showNotification(`✅ Research complete: ${tech.name}`, 'success');
+      UI.showDiscovery(active.techId);
+
+      // Start next in queue
+      if (state.research.queue.length > 0) {
+        const nextTech = state.research.queue.shift();
+        Actions.startResearch(nextTech);
+      }
+    }
+  }
+
+  function applyTechEffects(techId) {
+    const tech = CONFIG.TECHS[techId];
+    if (!tech || !tech.effect) return;
+
+    if (tech.effect.enableAutoMine) {
+      // Auto-mine is now available
+    }
+    if (tech.effect.enableBases) {
+      // Base construction now available
+    }
+  }
+
+  function processMission(dt) {
+    const state = State.get();
+    const mission = state.activeMission;
+    if (!mission) return;
+
+    const elapsed = (Date.now() - mission.startTime) / 1000;
+    if (elapsed >= mission.duration) {
+      // Mission complete!
+      completeMission(mission);
+    }
+  }
+
+  function completeMission(mission) {
+    const state = State.get();
+    state.activeMission = null;
+    state.stats.totalLaunches++;
+
+    if (mission.purpose === 'travel') {
+      // Move player to new location
+      state.currentLocation = mission.to;
+      State.visitLocation(mission.to);
+
+      const locConfig = CONFIG.LOCATIONS[mission.to];
+      state.missionsCompleted.push({ to: mission.to, time: Date.now() });
+
+      UI.showNotification(`🚀 Arrived at ${locConfig.name}!`, 'success');
+      UI.showArrival(mission.to);
+      UI.render();
+    }
+  }
+
+  function checkSecrets() {
+    const state = State.get();
+
+    for (const [secretId, secret] of Object.entries(CONFIG.SECRETS)) {
+      if (state.secretsFound.includes(secretId)) continue;
+
+      const locData = state.locations[secret.location];
+      if (!locData || !locData.visited) continue;
+      if (!locData.signalArrayBuilt) continue;
+      if (locData.secretTriggered) continue;
+
+      // Check trigger
+      const resourceMined = locData.totalMined[secret.trigger.replace('_mined', '')] || 0;
+      if (resourceMined >= secret.threshold) {
+        locData.secretTriggered = true;
+        triggerSecret(secretId, secret);
+      }
+    }
+  }
+
+  function triggerSecret(secretId, secret) {
+    const state = State.get();
+    state.secretsFound.push(secretId);
+    state.stats.secretsFound++;
+
+    // Unlock techs
+    for (const techId of (secret.unlockTechs || [])) {
+      State.unlockTech(techId);
+      if (!State.hasResearched(techId)) {
+        // Remove from locked state
+        CONFIG.TECHS[techId].locked = false;
+      }
+    }
+
+    // Grant reward resources
+    if (secret.reward) {
+      for (const [res, amount] of Object.entries(secret.reward)) {
+        State.addResource(res, amount);
+      }
+    }
+
+    // Show dramatic reveal
+    UI.showSecretReveal(secretId, secret);
+  }
+
+  function checkAchievements() {
+    const state = State.get();
+
+    for (const ach of CONFIG.ACHIEVEMENTS) {
+      if (State.hasAchievement(ach.id)) continue;
+
+      let earned = false;
+      switch (ach.trigger) {
+        case 'totalMined':
+          earned = state.stats.totalMined >= ach.value;
+          break;
+        case 'singleResource':
+          earned = Object.values(state.resources).some(v => v >= ach.value);
+          break;
+        case 'location':
+          earned = state.locations[ach.value] && state.locations[ach.value].visited;
+          break;
+        case 'basesBuilt':
+          earned = state.stats.basesBuilt >= ach.value;
+          break;
+        case 'basesCount':
+          earned = Object.values(state.locations).filter(l => l.baseBuilt).length >= ach.value;
+          break;
+        case 'tech':
+          earned = State.hasResearched(ach.value);
+          break;
+        case 'secret':
+          earned = state.secretsFound.includes(ach.value);
+          break;
+      }
+
+      if (earned) {
+        if (State.grantAchievement(ach.id)) {
+          UI.showAchievement(ach);
+        }
+      }
+    }
+  }
+
+  // Offline progress calculation
+  function calculateOfflineProgress() {
+    const state = State.get();
+    const now = Date.now();
+    const offlineSeconds = Math.min((now - state.lastSave) / 1000, 3600); // Max 1 hour
+
+    if (offlineSeconds < 5) return;
+
+    let totalGained = {};
+
+    // Calculate what bases would have produced
+    for (const [locId, locData] of Object.entries(state.locations)) {
+      if (!locData.baseBuilt) continue;
+
+      const production = State.getLocationProduction(locId);
+      for (const [res, ratePerSec] of Object.entries(production)) {
+        if (!totalGained[res]) totalGained[res] = 0;
+        totalGained[res] += ratePerSec * offlineSeconds * 0.5; // 50% offline efficiency
+      }
+    }
+
+    // Apply gained resources
+    let anyGained = false;
+    for (const [res, amount] of Object.entries(totalGained)) {
+      if (amount > 0.1) {
+        const max = State.getStorageMax(res);
+        const current = State.getResource(res);
+        const canAdd = Math.min(amount, max - current);
+        if (canAdd > 0) {
+          State.addResource(res, canAdd);
+          anyGained = true;
+        }
+      }
+    }
+
+    if (anyGained) {
+      const minutes = Math.floor(offlineSeconds / 60);
+      const secs = Math.floor(offlineSeconds % 60);
+      const timeStr = minutes > 0 ? `${minutes}m ${secs}s` : `${secs}s`;
+      UI.showOfflineProgress(totalGained, timeStr);
+    }
+  }
+
+  return {
+    start, stop, tick,
+    calculateOfflineProgress,
+    triggerSecret,
+  };
+})();
+
+
+// ==== actions.js ====
+// ============================================================
+// COSMIC FRONTIER - Player Actions
+// All actions the player can take in the game
+// ============================================================
+
+const Actions = (() => {
+
+  // ---- MINING ----
+  function mine(locationId) {
+    const locConfig = CONFIG.LOCATIONS[locationId];
+    if (!locConfig) return;
+
+    const mult = State.getMiningMultiplier();
+    const gained = {};
+    const locState = State.getLocation(locationId);
+
+    for (const [res, baseYield] of Object.entries(locConfig.baseYield)) {
+      const amount = baseYield * mult * (0.8 + Math.random() * 0.4); // ±20% variance
+      const max = State.getStorageMax(res);
+      const current = State.getResource(res);
+      const canAdd = Math.min(amount, max - current);
+      if (canAdd > 0) {
+        State.addResource(res, canAdd);
+        gained[res] = canAdd;
+
+        // Track per-location mining for secrets
+        if (!locState.totalMined[res]) locState.totalMined[res] = 0;
+        locState.totalMined[res] += canAdd;
+      }
+    }
+
+    // Visual feedback
+    UI.showMineEffect(gained);
+    return gained;
+  }
+
+  // ---- RESEARCH ----
+  function startResearch(techId) {
+    const state = State.get();
+    const tech = CONFIG.TECHS[techId];
+
+    if (!tech) return { ok: false, reason: 'Unknown technology' };
+    if (tech.locked) return { ok: false, reason: 'Technology locked' };
+    if (State.hasResearched(techId)) return { ok: false, reason: 'Already researched' };
+    if (state.research.active) return { ok: false, reason: 'Research already in progress' };
+
+    // Check prerequisites
+    for (const req of (tech.requires || [])) {
+      if (!State.hasResearched(req)) {
+        const reqTech = CONFIG.TECHS[req];
+        return { ok: false, reason: `Requires: ${reqTech ? reqTech.name : req}` };
+      }
+    }
+
+    // Check cost
+    if (!State.canAfford(tech.cost)) {
+      return { ok: false, reason: 'Insufficient resources' };
+    }
+
+    // Pay cost
+    State.spendResources(tech.cost);
+
+    // Start research
+    state.research.active = {
+      techId,
+      startTime: Date.now(),
+      duration: tech.researchTime,
+    };
+
+    UI.showNotification(`🔬 Researching: ${tech.name}`, 'info');
+    UI.renderResearch();
+
+    return { ok: true };
+  }
+
+  function queueResearch(techId) {
+    const state = State.get();
+    const tech = CONFIG.TECHS[techId];
+    if (!tech) return { ok: false, reason: 'Unknown technology' };
+
+    if (state.research.queue.includes(techId)) {
+      return { ok: false, reason: 'Already queued' };
+    }
+
+    state.research.queue.push(techId);
+    UI.showNotification(`📋 Queued: ${tech.name}`, 'info');
+    return { ok: true };
+  }
+
+  function cancelResearch() {
+    const state = State.get();
+    if (!state.research.active) return;
+    const tech = CONFIG.TECHS[state.research.active.techId];
+    // Refund 50% of cost
+    if (tech && tech.cost) {
+      for (const [res, amount] of Object.entries(tech.cost)) {
+        State.addResource(res, Math.floor(amount * 0.5));
+      }
+    }
+    state.research.active = null;
+    UI.renderResearch();
+    UI.showNotification('Research cancelled (50% refund)', 'warning');
+  }
+
+  // ---- BUILDING ----
+  function build(locationId, buildingId) {
+    const state = State.get();
+    const building = CONFIG.BUILDINGS[buildingId];
+    if (!building) return { ok: false, reason: 'Unknown building' };
+
+    // Check research requirement
+    if (building.requires && !State.hasResearched(building.requires)) {
+      const tech = CONFIG.TECHS[building.requires];
+      return { ok: false, reason: `Requires research: ${tech ? tech.name : building.requires}` };
+    }
+
+    // Check base requirement
+    const locData = State.getLocation(locationId);
+    if (building.requiresBase && !locData.baseBuilt) {
+      return { ok: false, reason: 'Requires base module first' };
+    }
+
+    // Check max count
+    const currentCount = State.getBuildingCount(locationId, buildingId);
+    if (building.maxPerLocation && currentCount >= building.maxPerLocation) {
+      return { ok: false, reason: `Max ${building.maxPerLocation} allowed here` };
+    }
+
+    // Scale cost with count
+    const cost = scaledBuildingCost(buildingId, currentCount);
+    if (!State.canAfford(cost)) {
+      return { ok: false, reason: 'Insufficient resources' };
+    }
+
+    // Pay and build
+    State.spendResources(cost);
+    State.addBuilding(locationId, buildingId);
+
+    const locConfig = CONFIG.LOCATIONS[locationId];
+    UI.showNotification(`🏗 Built ${building.name} on ${locConfig.name}`, 'success');
+    UI.render();
+
+    return { ok: true };
+  }
+
+  function scaledBuildingCost(buildingId, existingCount) {
+    const building = CONFIG.BUILDINGS[buildingId];
+    const scaleFactor = Math.pow(building.costScale, existingCount);
+    const cost = {};
+    for (const [res, base] of Object.entries(building.costBase)) {
+      cost[res] = Math.ceil(base * scaleFactor);
+    }
+    return cost;
+  }
+
+  // ---- ROCKETS ----
+  function buildRocket(rocketId) {
+    const state = State.get();
+    const rocketDef = CONFIG.ROCKETS[rocketId];
+    if (!rocketDef) return { ok: false, reason: 'Unknown rocket' };
+
+    if (!State.hasResearched(rocketDef.requires)) {
+      const tech = CONFIG.TECHS[rocketDef.requires];
+      return { ok: false, reason: `Requires: ${tech ? tech.name : rocketDef.requires}` };
+    }
+
+    if (!State.canAfford(rocketDef.cost)) {
+      return { ok: false, reason: 'Insufficient resources' };
+    }
+
+    State.spendResources(rocketDef.cost);
+    const entry = State.addToHangar(rocketId);
+
+    UI.showNotification(`🚀 ${rocketDef.name} added to hangar!`, 'success');
+    UI.renderLaunch();
+
+    return { ok: true, hangarId: entry.id };
+  }
+
+  // ---- LAUNCH ----
+  function launch(hangarId, destinationId) {
+    const state = State.get();
+
+    if (state.activeMission) {
+      return { ok: false, reason: 'A mission is already in progress' };
+    }
+
+    const hangarEntry = state.hangar.find(h => h.id === hangarId);
+    if (!hangarEntry) return { ok: false, reason: 'Rocket not found in hangar' };
+
+    const rocketDef = CONFIG.ROCKETS[hangarEntry.rocketId];
+    const destConfig = CONFIG.LOCATIONS[destinationId];
+    if (!destConfig) return { ok: false, reason: 'Unknown destination' };
+
+    // Check rocket can reach destination
+    if (rocketDef.range && !rocketDef.range.includes(destinationId)) {
+      return { ok: false, reason: `${rocketDef.name} cannot reach ${destConfig.name}` };
+    }
+
+    // Check destination is unlocked
+    if (!destConfig.unlocked) {
+      return { ok: false, reason: 'Destination not yet unlocked' };
+    }
+
+    // Calculate travel time (based on distance)
+    const from = CONFIG.LOCATIONS[state.currentLocation];
+    const duration = calculateTravelTime(from, destConfig, rocketDef);
+
+    // Consume rocket from hangar
+    State.removeFromHangar(hangarId);
+
+    // Create mission
+    state.activeMission = {
+      from: state.currentLocation,
+      to: destinationId,
+      rocketId: hangarEntry.rocketId,
+      rocketName: rocketDef.name,
+      startTime: Date.now(),
+      duration,
+      purpose: 'travel',
+    };
+
+    UI.showNotification(`🚀 Launched! Heading to ${destConfig.name}...`, 'launch');
+    UI.renderLaunch();
+    UI.render();
+
+    return { ok: true };
+  }
+
+  function calculateTravelTime(from, to, rocket) {
+    // Distance in AU (approximate)
+    const fromDist = from.distance || 0;
+    const toDist = to.distance || 0;
+    const distanceAU = Math.abs(toDist - fromDist);
+
+    // Base time in seconds (1 AU = ~60 seconds game time)
+    // Different rocket tiers are faster
+    const tierSpeedFactors = { 1: 1.0, 2: 0.6, 3: 0.3, 4: 0.1, 5: 0.05, 6: 0.01 };
+    const speedFactor = tierSpeedFactors[rocket.tier] || 1.0;
+
+    // For light-year distances, use special calculation
+    const distUnit = to.distanceUnit;
+    let baseTime;
+    if (distUnit === 'LY') {
+      baseTime = to.distance * 300; // light-years → seconds (warp drive collapses this)
+      return Math.max(30, Math.floor(baseTime * speedFactor));
+    }
+
+    baseTime = Math.max(5, distanceAU * 60);
+    return Math.max(10, Math.floor(baseTime * speedFactor));
+  }
+
+  function getMissionProgress() {
+    const state = State.get();
+    const mission = state.activeMission;
+    if (!mission) return null;
+
+    const elapsed = (Date.now() - mission.startTime) / 1000;
+    const progress = Math.min(1, elapsed / mission.duration);
+    const remaining = Math.max(0, mission.duration - elapsed);
+
+    return { ...mission, progress, remaining, elapsed };
+  }
+
+  // ---- UTILITY ----
+  function formatTime(seconds) {
+    if (seconds < 60) return `${Math.ceil(seconds)}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s`;
+    return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+  }
+
+  function formatNumber(n) {
+    if (n === undefined || n === null) return '0';
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return Math.floor(n).toString();
+  }
+
+  function getResearchProgress() {
+    const state = State.get();
+    const active = state.research.active;
+    if (!active) return null;
+
+    const tech = CONFIG.TECHS[active.techId];
+    const speedMult = State.getResearchSpeedMultiplier();
+    const adjustedDuration = tech.researchTime / speedMult;
+    const elapsed = (Date.now() - active.startTime) / 1000;
+    const progress = Math.min(1, elapsed / adjustedDuration);
+    const remaining = Math.max(0, adjustedDuration - elapsed);
+
+    return { techId: active.techId, tech, progress, remaining, adjustedDuration };
+  }
+
+  function getBuildingCostNext(locationId, buildingId) {
+    const count = State.getBuildingCount(locationId, buildingId);
+    return scaledBuildingCost(buildingId, count);
+  }
+
+  return {
+    mine, startResearch, queueResearch, cancelResearch,
+    build, buildRocket, launch,
+    getMissionProgress, getResearchProgress,
+    formatTime, formatNumber,
+    getBuildingCostNext, scaledBuildingCost,
+  };
+})();
+
+
+// ==== ui.js ====
+// ============================================================
+// COSMIC FRONTIER - UI System
+// All rendering, animations, and DOM management
+// ============================================================
+
+const UI = (() => {
+  let activeTab = 'base';
+  let secretRevealActive = false;
+  let particleContainer = null;
+  let lastRenderTime = 0;
+
+  // ---- INIT ----
+  function init() {
+    particleContainer = document.getElementById('particles');
+    bindTabNav();
+    bindKeyboard();
+    createStarfield();
+    render();
+  }
+
+  function bindTabNav() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+  }
+
+  function bindKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.key === '1') switchTab('base');
+      if (e.key === '2') switchTab('research');
+      if (e.key === '3') switchTab('build');
+      if (e.key === '4') switchTab('launch');
+      if (e.key === '5') switchTab('map');
+      if (e.key === '6') switchTab('log');
+    });
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.toggle('active', el.id === `tab-${tab}`);
+    });
+    render();
+  }
+
+  // ---- MAIN RENDER ----
+  function render() {
+    renderHeader();
+    renderResources();
+    switch (activeTab) {
+      case 'base': renderBase(); break;
+      case 'research': renderResearch(); break;
+      case 'build': renderBuild(); break;
+      case 'launch': renderLaunch(); break;
+      case 'map': renderMap(); break;
+      case 'log': renderLog(); break;
+    }
+  }
+
+  function tick(dt) {
+    const now = Date.now();
+    if (now - lastRenderTime > 500) { // Update UI at 2fps for efficiency
+      renderResources();
+      renderMissionProgress();
+      renderResearchProgress();
+      lastRenderTime = now;
+    }
+  }
+
+  // ---- HEADER ----
+  function renderHeader() {
+    const state = State.get();
+    const locId = state.currentLocation;
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locData = State.getLocation(locId);
+
+    const el = document.getElementById('location-header');
+    if (!el) return;
+
+    const distStr = locConfig.distance === 0 ? 'Home World' :
+      `${locConfig.distance} ${locConfig.distanceUnit || 'AU'} from Sun`;
+
+    el.innerHTML = `
+      <div class="location-badge" style="border-color: ${locConfig.color}">
+        <span class="location-icon">${locConfig.icon}</span>
+        <div class="location-info">
+          <div class="location-name">${locConfig.name}</div>
+          <div class="location-dist">${distStr}</div>
+        </div>
+        ${locData.baseBuilt ? '<span class="base-indicator">⚡ BASE</span>' : ''}
+      </div>
+      ${renderMissionProgressInline()}
+    `;
+  }
+
+  function renderMissionProgressInline() {
+    const mission = Actions.getMissionProgress();
+    if (!mission) return '';
+    const pct = Math.floor(mission.progress * 100);
+    const dest = CONFIG.LOCATIONS[mission.to];
+    return `
+      <div class="mission-inline">
+        <div class="mission-label">🚀 En route to ${dest ? dest.name : mission.to} — ${Actions.formatTime(mission.remaining)}</div>
+        <div class="mission-bar-wrap"><div class="mission-bar" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }
+
+  // ---- RESOURCES ----
+  function renderResources() {
+    const state = State.get();
+    const locConfig = CONFIG.LOCATIONS[state.currentLocation];
+    const container = document.getElementById('resources-bar');
+    if (!container) return;
+
+    const production = State.getLocationProduction(state.currentLocation);
+
+    const knownResources = locConfig.resources || [];
+    // Also show resources player has from other locations
+    const allResources = new Set([...knownResources, ...Object.keys(state.resources).filter(r => state.resources[r] > 0)]);
+
+    let html = '';
+    for (const resId of allResources) {
+      const amount = State.getResource(resId);
+      if (amount < 0.01 && !knownResources.includes(resId)) continue;
+      const resDef = CONFIG.RESOURCES[resId];
+      if (!resDef) continue;
+
+      const max = State.getStorageMax(resId);
+      const pct = Math.min(100, (amount / max) * 100);
+      const rate = production[resId] || 0;
+      const rateStr = rate > 0 ? `<span class="res-rate">+${Actions.formatNumber(rate)}/s</span>` : '';
+
+      html += `
+        <div class="resource-chip" title="${resDef.desc}" style="--res-color: ${resDef.color}">
+          <span class="res-icon">${resDef.icon}</span>
+          <div class="res-details">
+            <div class="res-name">${resDef.name}</div>
+            <div class="res-amount">${Actions.formatNumber(amount)} ${rateStr}</div>
+            <div class="res-bar-bg"><div class="res-bar-fill" style="width:${pct}%;background:${resDef.color}"></div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html || '<div class="no-resources">No resources yet. Start mining!</div>';
+  }
+
+  // ---- BASE TAB ----
+  function renderBase() {
+    const state = State.get();
+    const locId = state.currentLocation;
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locData = State.getLocation(locId);
+
+    const container = document.getElementById('tab-base');
+
+    const autoMinerCount = State.getBuildingCount(locId, 'auto_miner');
+    const production = State.getLocationProduction(locId);
+    const hasAutoMine = State.hasResearched('solar_panels');
+
+    let prodStr = '';
+    if (locData.baseBuilt && Object.keys(production).length > 0) {
+      prodStr = Object.entries(production)
+        .filter(([,v]) => v > 0)
+        .map(([r, v]) => {
+          const def = CONFIG.RESOURCES[r];
+          return `${def ? def.icon : ''} +${Actions.formatNumber(v)}/s`;
+        }).join('  ');
+    }
+
+    container.innerHTML = `
+      <div class="base-view">
+        <div class="planet-visual">
+          ${renderPlanet(locId)}
+        </div>
+        <div class="location-desc">${locConfig.description}</div>
+        <div class="flavor-text">"${locConfig.flavorText}"</div>
+
+        <div class="available-resources">
+          <h3>Available Resources</h3>
+          <div class="resource-tags">
+            ${locConfig.resources.map(r => {
+              const def = CONFIG.RESOURCES[r];
+              return def ? `<span class="res-tag" style="border-color:${def.color}">${def.icon} ${def.name}</span>` : '';
+            }).join('')}
+          </div>
+        </div>
+
+        <button class="mine-btn" id="mine-btn" onclick="onMineClick()">
+          <span class="mine-icon">⛏</span>
+          <span class="mine-text">MINE</span>
+          <span class="mine-sub">tap to extract resources</span>
+        </button>
+
+        ${locData.baseBuilt && prodStr ? `
+          <div class="auto-prod">
+            <span class="auto-label">⚡ Auto-production:</span>
+            <span class="auto-rates">${prodStr}</span>
+          </div>
+        ` : ''}
+
+        ${!locData.baseBuilt && hasAutoMine ? `
+          <div class="hint-box">💡 Build a <strong>Base Module</strong> in the Build tab to enable auto-mining here.</div>
+        ` : ''}
+
+        ${locData.secretTriggered ? `
+          <div class="secret-banner">
+            📡 <strong>Signal Detected & Analyzed</strong> — New technologies unlocked!
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function renderPlanet(locId) {
+    const loc = CONFIG.LOCATIONS[locId];
+    const hasRing = loc.ringColor;
+
+    let planet = `
+      <div class="planet-container">
+        ${hasRing ? `<div class="planet-ring" style="border-color:${loc.ringColor}"></div>` : ''}
+        <div class="planet-sphere" style="background: radial-gradient(circle at 35% 35%, ${lighten(loc.color, 40)}, ${loc.color}, ${darken(loc.color, 30)})">
+          <div class="planet-atmosphere" style="box-shadow: 0 0 30px ${loc.color}66, 0 0 60px ${loc.color}33"></div>
+        </div>
+      </div>
+    `;
+    return planet;
+  }
+
+  // ---- RESEARCH TAB ----
+  function renderResearch() {
+    const state = State.get();
+    const container = document.getElementById('tab-research');
+    if (!container) return;
+
+    const tiers = {};
+    for (const [techId, tech] of Object.entries(CONFIG.TECHS)) {
+      if (!tiers[tech.tier]) tiers[tech.tier] = [];
+      tiers[tech.tier].push({ id: techId, ...tech });
+    }
+
+    const tierNames = {
+      0: '🌍 Earth Foundation',
+      1: '🌙 Inner Solar System',
+      2: '🪐 Outer Solar System',
+      3: '🌀 Quantum Era',
+      4: '⭐ Interstellar',
+      5: '◈ Void Science',
+    };
+
+    let html = '';
+    const resProgress = Actions.getResearchProgress();
+
+    // Active research bar
+    if (resProgress) {
+      const pct = Math.floor(resProgress.progress * 100);
+      html += `
+        <div class="active-research">
+          <div class="ar-header">
+            <span>🔬 Researching: <strong>${resProgress.tech.name}</strong></span>
+            <span>${Actions.formatTime(resProgress.remaining)}</span>
+          </div>
+          <div class="ar-bar-bg"><div class="ar-bar-fill" style="width:${pct}%"></div></div>
+          <button class="cancel-btn" onclick="Actions.cancelResearch()">Cancel (50% refund)</button>
+        </div>
+      `;
+    }
+
+    // Research queue
+    if (state.research.queue.length > 0) {
+      html += `<div class="research-queue">
+        <span>📋 Queue: </span>
+        ${state.research.queue.map(tid => {
+          const t = CONFIG.TECHS[tid];
+          return t ? `<span class="queue-item">${t.name}</span>` : '';
+        }).join(' → ')}
+      </div>`;
+    }
+
+    // Tech tiers
+    for (const [tier, techs] of Object.entries(tiers).sort((a,b) => a[0]-b[0])) {
+      const anyVisible = techs.some(t => !t.locked || state.secretsFound.length > 0);
+      if (!anyVisible) continue;
+
+      html += `<div class="tech-tier">
+        <h3 class="tier-title">${tierNames[tier] || `Tier ${tier}`}</h3>
+        <div class="tech-grid">`;
+
+      for (const tech of techs) {
+        html += renderTechCard(tech, state, resProgress);
+      }
+
+      html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function renderTechCard(tech, state, resProgress) {
+    const done = State.hasResearched(tech.id);
+    const active = resProgress && resProgress.techId === tech.id;
+    const locked = tech.locked;
+
+    if (locked && !state.secretsFound.some(s => {
+      const secret = CONFIG.SECRETS[s];
+      return secret && secret.unlockTechs && secret.unlockTechs.includes(tech.id);
+    })) {
+      // Show redacted card for locked techs (only partially)
+      return `
+        <div class="tech-card locked">
+          <div class="tech-icon">🔒</div>
+          <div class="tech-name">[ CLASSIFIED ]</div>
+          <div class="tech-desc">Requires special discovery to unlock.</div>
+        </div>
+      `;
+    }
+
+    const prereqsMet = (tech.requires || []).every(r => State.hasResearched(r));
+    const canAfford = State.canAfford(tech.cost || {});
+    const canResearch = prereqsMet && canAfford && !done && !active && !state.research.active;
+
+    let costHtml = '';
+    if (!done && tech.cost) {
+      costHtml = Object.entries(tech.cost).map(([r, amt]) => {
+        const def = CONFIG.RESOURCES[r];
+        const have = State.getResource(r);
+        const enough = have >= amt;
+        return `<span class="cost-item ${enough ? 'ok' : 'short'}">
+          ${def ? def.icon : r} ${Actions.formatNumber(amt)}
+        </span>`;
+      }).join('');
+    }
+
+    const unlocksHtml = tech.unlocks && tech.unlocks.length > 0
+      ? `<div class="tech-unlocks">Unlocks: ${tech.unlocks.map(u => {
+          const rocket = CONFIG.ROCKETS[u];
+          const building = CONFIG.BUILDINGS[u];
+          return rocket ? `🚀 ${rocket.name}` : building ? `🏗 ${building.name}` : u;
+        }).join(', ')}</div>`
+      : '';
+
+    return `
+      <div class="tech-card ${done ? 'done' : ''} ${active ? 'active' : ''} ${!prereqsMet ? 'blocked' : ''}">
+        <div class="tech-icon">${tech.icon}</div>
+        <div class="tech-name">${tech.name}</div>
+        <div class="tech-desc">${tech.desc}</div>
+        ${unlocksHtml}
+        ${done ? '<div class="tech-status done-badge">✅ Researched</div>' :
+          active ? `<div class="tech-status active-badge">🔬 In Progress</div>` :
+          !prereqsMet ? '<div class="tech-status blocked-badge">🔒 Locked</div>' :
+          `<div class="tech-cost">${costHtml}</div>
+           <button class="research-btn ${canResearch ? '' : 'disabled'}"
+             onclick="onResearchClick('${tech.id}')"
+             ${canResearch ? '' : 'disabled'}>
+             Research (${Actions.formatTime(tech.researchTime)})
+           </button>`
+        }
+      </div>
+    `;
+  }
+
+  function renderResearchProgress() {
+    const progress = Actions.getResearchProgress();
+    if (!progress) return;
+
+    const el = document.querySelector('.ar-bar-fill');
+    if (el) el.style.width = Math.floor(progress.progress * 100) + '%';
+
+    const timeEl = document.querySelector('.active-research .ar-header span:last-child');
+    if (timeEl) timeEl.textContent = Actions.formatTime(progress.remaining);
+  }
+
+  // ---- BUILD TAB ----
+  function renderBuild() {
+    const state = State.get();
+    const locId = state.currentLocation;
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locData = State.getLocation(locId);
+    const container = document.getElementById('tab-build');
+
+    let html = `<div class="build-view">
+      <h3>Buildings on ${locConfig.name}</h3>
+    `;
+
+    // Show existing buildings
+    const existing = locData.buildings;
+    if (Object.keys(existing).length > 0) {
+      html += '<div class="existing-buildings">';
+      for (const [bId, count] of Object.entries(existing)) {
+        const bDef = CONFIG.BUILDINGS[bId];
+        if (!bDef || count === 0) continue;
+        html += `
+          <div class="building-existing">
+            <span>${bDef.icon} ${bDef.name}</span>
+            <span class="building-count">×${count}</span>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+
+    html += '<h3>Available Buildings</h3><div class="build-grid">';
+
+    for (const [bId, bDef] of Object.entries(CONFIG.BUILDINGS)) {
+      html += renderBuildCard(locId, bId, bDef, locData, state);
+    }
+
+    html += '</div></div>';
+    container.innerHTML = html;
+  }
+
+  function renderBuildCard(locId, bId, bDef, locData, state) {
+    const isResearched = State.hasResearched(bDef.requires);
+    const count = State.getBuildingCount(locId, bId);
+    const maxed = bDef.maxPerLocation && count >= bDef.maxPerLocation;
+    const needsBase = bDef.requiresBase && !locData.baseBuilt;
+    const cost = Actions.getBuildingCostNext(locId, bId);
+    const canAfford = State.canAfford(cost);
+
+    if (!isResearched) {
+      return `
+        <div class="build-card locked">
+          <div class="build-icon">🔒</div>
+          <div class="build-name">${bDef.name}</div>
+          <div class="build-req">Requires: ${CONFIG.TECHS[bDef.requires]?.name || bDef.requires}</div>
+        </div>
+      `;
+    }
+
+    const costHtml = Object.entries(cost).map(([r, amt]) => {
+      const def = CONFIG.RESOURCES[r];
+      const have = State.getResource(r);
+      const ok = have >= amt;
+      return `<span class="cost-item ${ok ? 'ok' : 'short'}">${def ? def.icon : r} ${Actions.formatNumber(amt)}</span>`;
+    }).join('');
+
+    const canBuild = canAfford && !maxed && !needsBase;
+
+    return `
+      <div class="build-card ${maxed ? 'maxed' : ''} ${needsBase ? 'blocked' : ''}">
+        <div class="build-icon">${bDef.icon}</div>
+        <div class="build-name">${bDef.name} ${count > 0 ? `<span class="count-badge">×${count}</span>` : ''}</div>
+        <div class="build-desc">${bDef.desc}</div>
+        ${maxed ? '<div class="maxed-label">MAX</div>' :
+          needsBase ? '<div class="blocked-label">Requires Base Module</div>' :
+          `<div class="build-cost">${costHtml}</div>
+           <button class="build-btn ${canBuild ? '' : 'disabled'}"
+             onclick="onBuildClick('${bId}')"
+             ${canBuild ? '' : 'disabled'}>
+             Build ${bDef.maxPerLocation ? `(${count}/${bDef.maxPerLocation})` : ''}
+           </button>`
+        }
+      </div>
+    `;
+  }
+
+  // ---- LAUNCH TAB ----
+  function renderLaunch() {
+    const state = State.get();
+    const container = document.getElementById('tab-launch');
+    if (!container) return;
+
+    const mission = Actions.getMissionProgress();
+
+    let html = '';
+
+    // Active mission display
+    if (mission) {
+      const dest = CONFIG.LOCATIONS[mission.to];
+      const pct = Math.floor(mission.progress * 100);
+      html += `
+        <div class="active-mission">
+          <div class="mission-title">🚀 ACTIVE MISSION</div>
+          <div class="mission-detail">
+            <span>${CONFIG.LOCATIONS[mission.from]?.icon} ${CONFIG.LOCATIONS[mission.from]?.name}</span>
+            <span class="mission-arrow">→→→</span>
+            <span>${dest?.icon} ${dest?.name}</span>
+          </div>
+          <div class="mission-rocket">${CONFIG.ROCKETS[mission.rocketId]?.icon || '🚀'} ${mission.rocketName}</div>
+          <div class="mission-time">ETA: ${Actions.formatTime(mission.remaining)}</div>
+          <div class="mission-bar-wrap big">
+            <div class="mission-bar" style="width:${pct}%">
+              <div class="thruster-glow"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Hangar
+    html += '<div class="hangar-section"><h3>🏭 Hangar</h3>';
+    if (state.hangar.length === 0) {
+      html += '<p class="empty-hint">No rockets in hangar. Build one below!</p>';
+    } else {
+      html += '<div class="hangar-list">';
+      for (const entry of state.hangar) {
+        const rDef = CONFIG.ROCKETS[entry.rocketId];
+        html += `
+          <div class="hangar-entry">
+            <div class="rocket-display">
+              <span class="rocket-icon-lg">${rDef.icon}</span>
+              <div>
+                <div class="rocket-name">${rDef.name}</div>
+                <div class="rocket-desc">${rDef.desc}</div>
+              </div>
+            </div>
+            <div class="launch-targets">
+              ${renderLaunchTargets(entry, rDef, state)}
+            </div>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Build rocket section
+    html += '<div class="build-rockets"><h3>🚀 Build Rockets</h3><div class="rocket-grid">';
+    for (const [rId, rDef] of Object.entries(CONFIG.ROCKETS)) {
+      html += renderRocketCard(rId, rDef, state);
+    }
+    html += '</div></div>';
+
+    container.innerHTML = html;
+  }
+
+  function renderLaunchTargets(entry, rDef, state) {
+    const currentLoc = state.currentLocation;
+    const allLocs = rDef.range === null
+      ? Object.keys(CONFIG.LOCATIONS)
+      : (rDef.range || []);
+
+    return allLocs
+      .filter(locId => locId !== currentLoc && CONFIG.LOCATIONS[locId]?.unlocked)
+      .map(locId => {
+        const lDef = CONFIG.LOCATIONS[locId];
+        const disabled = !!state.activeMission;
+        return `
+          <button class="launch-target-btn ${disabled ? 'disabled' : ''}"
+            onclick="onLaunchClick(${entry.id}, '${locId}')"
+            ${disabled ? 'disabled' : ''}>
+            ${lDef.icon} ${lDef.name}
+          </button>
+        `;
+      }).join('') || '<span class="no-targets">No reachable destinations</span>';
+  }
+
+  function renderRocketCard(rId, rDef, state) {
+    const isUnlocked = State.hasResearched(rDef.requires);
+    if (!isUnlocked) {
+      return `
+        <div class="rocket-card locked">
+          <div class="rocket-icon">${rDef.icon}</div>
+          <div class="rocket-name">${rDef.name}</div>
+          <div class="rocket-req">Requires: ${CONFIG.TECHS[rDef.requires]?.name || rDef.requires}</div>
+        </div>
+      `;
+    }
+
+    const canAfford = State.canAfford(rDef.cost);
+    const costHtml = Object.entries(rDef.cost).map(([r, amt]) => {
+      const def = CONFIG.RESOURCES[r];
+      const have = State.getResource(r);
+      const ok = have >= amt;
+      return `<span class="cost-item ${ok ? 'ok' : 'short'}">${def ? def.icon : r} ${Actions.formatNumber(amt)}</span>`;
+    }).join('');
+
+    return `
+      <div class="rocket-card">
+        <div class="rocket-icon">${rDef.icon}</div>
+        <div class="rocket-name">${rDef.name}</div>
+        <div class="rocket-tier">Tier ${rDef.tier}</div>
+        <div class="rocket-desc">${rDef.desc}</div>
+        <div class="rocket-cost">${costHtml}</div>
+        <button class="build-rocket-btn ${canAfford ? '' : 'disabled'}"
+          onclick="onBuildRocketClick('${rId}')"
+          ${canAfford ? '' : 'disabled'}>
+          Build Rocket
+        </button>
+      </div>
+    `;
+  }
+
+  function renderMissionProgress() {
+    const mission = Actions.getMissionProgress();
+    const missionBar = document.querySelector('.active-mission .mission-bar');
+    const missionTime = document.querySelector('.active-mission .mission-time');
+
+    if (mission && missionBar) {
+      missionBar.style.width = Math.floor(mission.progress * 100) + '%';
+    }
+    if (mission && missionTime) {
+      missionTime.textContent = `ETA: ${Actions.formatTime(mission.remaining)}`;
+    }
+
+    // Update inline header mission
+    const inlineMission = document.querySelector('.mission-inline');
+    if (mission && !inlineMission) {
+      renderHeader();
+    } else if (!mission && inlineMission) {
+      renderHeader();
+    } else if (mission && inlineMission) {
+      const barEl = inlineMission.querySelector('.mission-bar');
+      const labelEl = inlineMission.querySelector('.mission-label');
+      if (barEl) barEl.style.width = Math.floor(mission.progress * 100) + '%';
+      if (labelEl) {
+        const dest = CONFIG.LOCATIONS[mission.to];
+        labelEl.textContent = `🚀 En route to ${dest ? dest.name : mission.to} — ${Actions.formatTime(mission.remaining)}`;
+      }
+    }
+  }
+
+  // ---- MAP TAB ----
+  function renderMap() {
+    const state = State.get();
+    const container = document.getElementById('tab-map');
+
+    const groups = [
+      { label: '🌍 Earth System', locs: ['earth', 'moon'] },
+      { label: '🔴 Inner Solar System', locs: ['mars', 'asteroidBelt'] },
+      { label: '🟠 Outer Solar System', locs: ['jupiter', 'europa', 'saturn', 'titan', 'uranus', 'neptune'] },
+      { label: '🌌 Kuiper & Beyond', locs: ['kuiperBelt'] },
+      { label: '⭐ Nearby Stars', locs: ['proxima', 'proximaB', 'alphaCentauri'] },
+      { label: '◈ Void Space', locs: ['voidNexus'] },
+    ];
+
+    let html = '<div class="galaxy-map">';
+
+    for (const group of groups) {
+      const visible = group.locs.some(id => {
+        const loc = CONFIG.LOCATIONS[id];
+        return loc && (loc.unlocked || State.getLocation(id).visited);
+      });
+      if (!visible) continue;
+
+      html += `<div class="map-group"><h3 class="map-group-title">${group.label}</h3><div class="map-nodes">`;
+
+      for (const locId of group.locs) {
+        const locConfig = CONFIG.LOCATIONS[locId];
+        if (!locConfig) continue;
+
+        const locData = State.getLocation(locId);
+        const isCurrentLocation = locId === state.currentLocation;
+        const isVisited = locData.visited;
+        const isUnlocked = locConfig.unlocked;
+        const isSecret = locConfig.secret;
+
+        if (!isUnlocked && !isVisited) {
+          html += `
+            <div class="map-node unknown">
+              <div class="map-node-icon">❓</div>
+              <div class="map-node-name">???</div>
+              <div class="map-node-status">Not yet discovered</div>
+            </div>
+          `;
+          continue;
+        }
+
+        html += `
+          <div class="map-node ${isCurrentLocation ? 'current' : ''} ${isVisited ? 'visited' : ''}"
+            style="--loc-color: ${locConfig.color}"
+            onclick="onMapNodeClick('${locId}')">
+            <div class="map-node-icon">${locConfig.icon}</div>
+            <div class="map-node-name">${locConfig.name}</div>
+            <div class="map-node-dist">${locConfig.distance} ${locConfig.distanceUnit || 'AU'}</div>
+            ${isCurrentLocation ? '<div class="here-badge">YOU ARE HERE</div>' : ''}
+            ${locData.baseBuilt ? '<div class="base-badge">⚡ Base</div>' : ''}
+            ${locData.secretTriggered ? '<div class="secret-badge">📡 Signal</div>' : ''}
+          </div>
+        `;
+      }
+
+      html += '</div></div>';
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ---- LOG TAB ----
+  function renderLog() {
+    const state = State.get();
+    const container = document.getElementById('tab-log');
+
+    const hours = Math.floor(state.stats.playTime / 3600);
+    const mins = Math.floor((state.stats.playTime % 3600) / 60);
+    const secs = Math.floor(state.stats.playTime % 60);
+
+    let html = `
+      <div class="log-view">
+        <div class="stats-panel">
+          <h3>📊 Mission Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-item"><span>⏱ Play Time</span><span>${hours}h ${mins}m ${secs}s</span></div>
+            <div class="stat-item"><span>⛏ Total Mined</span><span>${Actions.formatNumber(state.stats.totalMined)}</span></div>
+            <div class="stat-item"><span>🚀 Launches</span><span>${state.stats.totalLaunches}</span></div>
+            <div class="stat-item"><span>🔬 Researched</span><span>${state.stats.totalResearched}</span></div>
+            <div class="stat-item"><span>🏗 Bases Built</span><span>${state.stats.basesBuilt}</span></div>
+            <div class="stat-item"><span>🌍 Locations Visited</span><span>${state.stats.locationsVisited}</span></div>
+            <div class="stat-item"><span>📡 Secrets Found</span><span>${state.stats.secretsFound}</span></div>
+          </div>
+        </div>
+
+        <div class="achievements-panel">
+          <h3>🏆 Achievements (${state.achievements.length}/${CONFIG.ACHIEVEMENTS.length})</h3>
+          <div class="achievement-list">
+            ${CONFIG.ACHIEVEMENTS.map(ach => {
+              const earned = State.hasAchievement(ach.id);
+              return `
+                <div class="achievement ${earned ? 'earned' : 'locked'}">
+                  <span class="ach-icon">${ach.icon}</span>
+                  <div class="ach-info">
+                    <div class="ach-name">${ach.name}</div>
+                    <div class="ach-desc">${earned ? ach.desc : '???'}</div>
+                  </div>
+                  ${earned ? '<span class="ach-check">✅</span>' : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="save-panel">
+          <button class="save-btn" onclick="State.save(); UI.showNotification('Game saved!', 'success')">💾 Save Game</button>
+          <button class="reset-btn" onclick="onResetGame()">🗑 Reset Game</button>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+  }
+
+  // ---- NOTIFICATIONS ----
+  function showNotification(msg, type = 'info') {
+    const container = document.getElementById('notifications');
+    if (!container) return;
+
+    const el = document.createElement('div');
+    el.className = `notification ${type}`;
+    el.innerHTML = msg;
+    container.appendChild(el);
+
+    // Animate in
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 400);
+    }, CONFIG.SETTINGS.notificationDuration);
+  }
+
+  function showAchievement(ach) {
+    const container = document.getElementById('notifications');
+    if (!container) return;
+
+    const el = document.createElement('div');
+    el.className = 'notification achievement-popup';
+    el.innerHTML = `
+      <div class="ach-popup-inner">
+        <span class="ach-popup-icon">${ach.icon}</span>
+        <div>
+          <div class="ach-popup-title">Achievement Unlocked!</div>
+          <div class="ach-popup-name">${ach.name}</div>
+          <div class="ach-popup-desc">${ach.desc}</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 400);
+    }, 5000);
+  }
+
+  // ---- MINE CLICK EFFECT ----
+  function showMineEffect(gained) {
+    const btn = document.getElementById('mine-btn');
+    if (!btn) return;
+
+    btn.classList.add('mining');
+    setTimeout(() => btn.classList.remove('mining'), 150);
+
+    // Floating text for each resource
+    for (const [resId, amount] of Object.entries(gained)) {
+      if (amount < 0.01) continue;
+      const def = CONFIG.RESOURCES[resId];
+      if (!def) continue;
+
+      const el = document.createElement('div');
+      el.className = 'float-text';
+      el.style.color = def.color;
+
+      const rect = btn.getBoundingClientRect();
+      el.style.left = (rect.left + Math.random() * rect.width) + 'px';
+      el.style.top = (rect.top - 10) + 'px';
+      el.textContent = `${def.icon} +${Actions.formatNumber(amount)}`;
+      document.body.appendChild(el);
+
+      requestAnimationFrame(() => el.classList.add('float-up'));
+      setTimeout(() => el.remove(), 1200);
+    }
+
+    // Particles
+    spawnParticles(btn);
+  }
+
+  function spawnParticles(target) {
+    if (!particleContainer) return;
+    const rect = target.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    for (let i = 0; i < CONFIG.SETTINGS.clickParticles; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const angle = (Math.PI * 2 / CONFIG.SETTINGS.clickParticles) * i;
+      const dist = 30 + Math.random() * 40;
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.setProperty('--tx', tx + 'px');
+      p.style.setProperty('--ty', ty + 'px');
+      particleContainer.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
+  }
+
+  // ---- DISCOVERY REVEAL ----
+  function showDiscovery(techId) {
+    const tech = CONFIG.TECHS[techId];
+    if (!tech) return;
+
+    const unlockLoc = tech.unlockLocation;
+    if (!unlockLoc) return;
+
+    const loc = CONFIG.LOCATIONS[unlockLoc];
+    if (!loc) return;
+
+    showNotification(`🔓 New location unlocked: ${loc.icon} ${loc.name}`, 'success');
+  }
+
+  // ---- SECRET REVEAL ----
+  function showSecretReveal(secretId, secret) {
+    if (secretRevealActive) return;
+    secretRevealActive = true;
+
+    const overlay = document.getElementById('secret-overlay');
+    const contentEl = document.getElementById('secret-content');
+
+    overlay.classList.add('active');
+    contentEl.innerHTML = `
+      <div class="secret-title">${secret.title}</div>
+      <div class="secret-messages" id="secret-messages"></div>
+      <button class="secret-close-btn" id="secret-close" style="display:none"
+        onclick="UI.closeSecretReveal()">
+        ACKNOWLEDGE ✓
+      </button>
+    `;
+
+    const msgContainer = document.getElementById('secret-messages');
+    let msgIndex = 0;
+
+    function showNextMessage() {
+      if (msgIndex >= secret.messages.length) {
+        document.getElementById('secret-close').style.display = 'block';
+        return;
+      }
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'secret-message';
+      msgEl.textContent = secret.messages[msgIndex];
+      msgContainer.appendChild(msgEl);
+
+      requestAnimationFrame(() => msgEl.classList.add('show'));
+
+      msgIndex++;
+      setTimeout(showNextMessage, 1800);
+    }
+
+    setTimeout(showNextMessage, 500);
+  }
+
+  function closeSecretReveal() {
+    const overlay = document.getElementById('secret-overlay');
+    overlay.classList.remove('active');
+    secretRevealActive = false;
+    render();
+  }
+
+  // ---- ARRIVAL REVEAL ----
+  function showArrival(locId) {
+    const loc = CONFIG.LOCATIONS[locId];
+    if (!loc) return;
+
+    const overlay = document.getElementById('arrival-overlay');
+    const contentEl = document.getElementById('arrival-content');
+
+    overlay.classList.add('active');
+    contentEl.innerHTML = `
+      <div class="arrival-icon">${loc.icon}</div>
+      <div class="arrival-name">Arrived at ${loc.name}</div>
+      <div class="arrival-dist">${loc.distance} ${loc.distanceUnit || 'AU'} from the Sun</div>
+      <div class="arrival-flavor">"${loc.flavorText}"</div>
+      <div class="arrival-resources">
+        Available resources: ${loc.resources.map(r => {
+          const def = CONFIG.RESOURCES[r];
+          return def ? `${def.icon} ${def.name}` : r;
+        }).join(' · ')}
+      </div>
+      <button onclick="UI.closeArrival()">Begin Exploration</button>
+    `;
+
+    setTimeout(() => overlay.classList.remove('active'), 6000);
+  }
+
+  function closeArrival() {
+    document.getElementById('arrival-overlay').classList.remove('active');
+    switchTab('base');
+  }
+
+  // ---- OFFLINE PROGRESS ----
+  function showOfflineProgress(gained, timeStr) {
+    const overlay = document.getElementById('offline-overlay');
+    const contentEl = document.getElementById('offline-content');
+
+    const gainedList = Object.entries(gained)
+      .filter(([,v]) => v > 0.1)
+      .map(([r, v]) => {
+        const def = CONFIG.RESOURCES[r];
+        return `<div class="offline-resource">
+          ${def ? def.icon : r} ${def ? def.name : r}: +${Actions.formatNumber(v)}
+        </div>`;
+      }).join('');
+
+    if (!gainedList) return;
+
+    contentEl.innerHTML = `
+      <div class="offline-title">⏰ Welcome Back!</div>
+      <div class="offline-time">You were away for ${timeStr}</div>
+      <div class="offline-subtitle">Your bases produced while you were gone:</div>
+      <div class="offline-resources">${gainedList}</div>
+      <button onclick="document.getElementById('offline-overlay').classList.remove('active')">Continue</button>
+    `;
+
+    overlay.classList.add('active');
+  }
+
+  // ---- STARFIELD ----
+  function createStarfield() {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const stars = [];
+    const numStars = 200;
+
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        alpha: Math.random() * 0.8 + 0.2,
+        speed: Math.random() * 0.3 + 0.05,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinkleOffset: Math.random() * Math.PI * 2,
+      });
+    }
+
+    let animFrame;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const t = Date.now() / 1000;
+
+      for (const star of stars) {
+        const twinkle = 0.5 + 0.5 * Math.sin(t * star.twinkleSpeed * 100 + star.twinkleOffset);
+        ctx.globalAlpha = star.alpha * (0.5 + twinkle * 0.5);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  }
+
+  // ---- COLOR UTILS ----
+  function lighten(hex, amount) {
+    return adjustColor(hex, amount);
+  }
+
+  function darken(hex, amount) {
+    return adjustColor(hex, -amount);
+  }
+
+  function adjustColor(hex, amount) {
+    const clamp = v => Math.min(255, Math.max(0, v));
+    let r, g, b;
+    if (hex.startsWith('#')) {
+      const n = parseInt(hex.slice(1), 16);
+      r = (n >> 16) & 0xff;
+      g = (n >> 8) & 0xff;
+      b = n & 0xff;
+    } else {
+      return hex;
+    }
+    r = clamp(r + amount);
+    g = clamp(g + amount);
+    b = clamp(b + amount);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // ---- MAP NODE CLICK ----
+  function onMapNodeClick(locId) {
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locData = State.getLocation(locId);
+    if (!locConfig) return;
+
+    showNotification(`${locConfig.icon} ${locConfig.name}: ${locConfig.description}`, 'info');
+  }
+
+  return {
+    init, render, tick, switchTab,
+    showNotification, showAchievement,
+    showMineEffect, showDiscovery,
+    showSecretReveal, closeSecretReveal,
+    showArrival, closeArrival,
+    showOfflineProgress,
+    renderResearch, renderLaunch,
+    onMapNodeClick,
+  };
+})();
+
+// ---- GLOBAL EVENT HANDLERS (called from inline HTML) ----
+function onMineClick() {
+  const state = State.get();
+  Actions.mine(state.currentLocation);
+}
+
+function onResearchClick(techId) {
+  const result = Actions.startResearch(techId);
+  if (!result.ok) {
+    UI.showNotification(`❌ ${result.reason}`, 'error');
+  } else {
+    UI.renderResearch();
+  }
+}
+
+function onBuildClick(buildingId) {
+  const state = State.get();
+  const result = Actions.build(state.currentLocation, buildingId);
+  if (!result.ok) {
+    UI.showNotification(`❌ ${result.reason}`, 'error');
+  }
+}
+
+function onBuildRocketClick(rocketId) {
+  const result = Actions.buildRocket(rocketId);
+  if (!result.ok) {
+    UI.showNotification(`❌ ${result.reason}`, 'error');
+  }
+}
+
+function onLaunchClick(hangarId, destinationId) {
+  const result = Actions.launch(hangarId, destinationId);
+  if (!result.ok) {
+    UI.showNotification(`❌ ${result.reason}`, 'error');
+  }
+}
+
+function onMapNodeClick(locId) {
+  UI.onMapNodeClick(locId);
+}
+
+function onResetGame() {
+  if (confirm('Reset all progress? This cannot be undone!')) {
+    State.reset();
+    location.reload();
+  }
+}
+
+
+// ==== main.js ====
+// ============================================================
+// COSMIC FRONTIER - Main Entry Point
+// Game initialization and startup sequence
+// ============================================================
+
+(function () {
+  'use strict';
+
+  function init() {
+    // Initialize game state (load from storage or create fresh)
+    const state = State.init();
+
+    // Apply any tech effects already researched (from loaded save)
+    for (const techId of state.research.completed) {
+      const tech = CONFIG.TECHS[techId];
+      if (!tech) continue;
+
+      // Re-unlock locations
+      if (tech.unlockLocation) CONFIG.LOCATIONS[tech.unlockLocation].unlocked = true;
+      if (tech.unlockLocationAlt) CONFIG.LOCATIONS[tech.unlockLocationAlt].unlocked = true;
+    }
+
+    // Re-apply secret unlocks
+    for (const secretId of state.secretsFound) {
+      const secret = CONFIG.SECRETS[secretId];
+      if (secret && secret.unlockTechs) {
+        for (const techId of secret.unlockTechs) {
+          State.unlockTech(techId);
+        }
+      }
+    }
+
+    // Initialize UI
+    UI.init();
+
+    // Show loading sequence
+    showSplash(() => {
+      // Calculate offline progress
+      Engine.calculateOfflineProgress();
+
+      // Start the game engine
+      Engine.start();
+
+      // Tutorial for new players
+      if (!state.ui.tutorialDone && state.stats.totalMined === 0) {
+        setTimeout(() => showTutorial(), 500);
+      }
+    });
+  }
+
+  function showSplash(callback) {
+    const splash = document.getElementById('splash');
+    if (!splash) {
+      callback();
+      return;
+    }
+
+    let progress = 0;
+    const bar = splash.querySelector('.splash-bar-fill');
+    const statusEl = splash.querySelector('.splash-status');
+
+    const steps = [
+      'Initializing systems...',
+      'Loading star charts...',
+      'Calibrating sensors...',
+      'Engaging drives...',
+      'Ready for launch.',
+    ];
+
+    let stepIndex = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25 + 5;
+      if (progress > 100) progress = 100;
+      if (bar) bar.style.width = progress + '%';
+
+      const targetStep = Math.floor((progress / 100) * steps.length);
+      if (targetStep !== stepIndex && targetStep < steps.length) {
+        stepIndex = targetStep;
+        if (statusEl) statusEl.textContent = steps[stepIndex];
+      }
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          splash.classList.add('fade-out');
+          setTimeout(() => {
+            splash.style.display = 'none';
+            callback();
+          }, 600);
+        }, 400);
+      }
+    }, 120);
+  }
+
+  function showTutorial() {
+    const state = State.get();
+    const steps = [
+      {
+        title: '👋 Welcome to Cosmic Frontier!',
+        text: 'You are humanity\'s first resource director. Start by mining Earth\'s resources to fund your journey to the stars.',
+        highlight: '#mine-btn',
+      },
+      {
+        title: '⛏ Mine Resources',
+        text: 'Tap the MINE button to extract iron and silicon. These are the foundation of everything you\'ll build.',
+        highlight: '#mine-btn',
+      },
+      {
+        title: '🔬 Research Technology',
+        text: 'Use the Research tab to unlock new technologies. Start with "Advanced Mining Drills" and "Chemical Rockets".',
+        highlight: '[data-tab="research"]',
+      },
+      {
+        title: '🚀 Reach for the Stars',
+        text: 'Once you have rocket technology, build a rocket in the Launch tab and blast off to the Moon. The cosmos awaits!',
+        highlight: '[data-tab="launch"]',
+      },
+    ];
+
+    showTutorialStep(0, steps, state);
+  }
+
+  function showTutorialStep(index, steps, state) {
+    if (index >= steps.length) {
+      state.ui.tutorialDone = true;
+      return;
+    }
+
+    const step = steps[index];
+    const tutEl = document.getElementById('tutorial-popup');
+    if (!tutEl) return;
+
+    tutEl.innerHTML = `
+      <div class="tutorial-inner">
+        <div class="tutorial-title">${step.title}</div>
+        <div class="tutorial-text">${step.text}</div>
+        <div class="tutorial-footer">
+          <span>${index + 1} / ${steps.length}</span>
+          <button onclick="showNextTutorial(${index + 1}, ${JSON.stringify(steps).replace(/"/g, '&quot;')})">
+            ${index === steps.length - 1 ? 'Begin!' : 'Next →'}
+          </button>
+        </div>
+      </div>
+    `;
+    tutEl.classList.add('show');
+
+    // Highlight target element
+    if (step.highlight) {
+      const target = document.querySelector(step.highlight);
+      if (target) {
+        target.classList.add('tutorial-highlight');
+        setTimeout(() => target.classList.remove('tutorial-highlight'), 4000);
+      }
+    }
+  }
+
+  // Expose for inline call
+  window.showNextTutorial = function(index, steps) {
+    const state = State.get();
+    const tutEl = document.getElementById('tutorial-popup');
+    if (index >= steps.length) {
+      tutEl.classList.remove('show');
+      state.ui.tutorialDone = true;
+      return;
+    }
+    showTutorialStep(index, steps, state);
+  };
+
+  // Start when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>
