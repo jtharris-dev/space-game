@@ -12,10 +12,10 @@
 </head>
 <body>
 
-<!-- Starfield background canvas -->
+<!-- Starfield background canvas (always behind everything) -->
 <canvas id="starfield"></canvas>
 
-<!-- Scene atmosphere layer (sits between starfield and app) -->
+<!-- Atmospheric scene layer -->
 <div id="scene-layer">
   <div class="scene-atmos-gradient"></div>
   <div class="scene-ground-plane"></div>
@@ -24,7 +24,7 @@
   <div class="scene-speed-overlay"></div>
 </div>
 
-<!-- Particle effects layer -->
+<!-- Particle effects (above scene, below app) -->
 <div id="particles"></div>
 
 <!-- Splash screen -->
@@ -36,120 +36,164 @@
   <div class="splash-status">Initializing systems...</div>
 </div>
 
-<!-- Main App -->
+<!-- ======== MAIN APP ======== -->
 <div id="app">
 
-  <!-- Location Header -->
-  <div id="location-header">
-    <!-- Rendered by UI.renderHeader() -->
+  <!-- Slim top HUD -->
+  <div id="hud-top">
+    <div id="hud-location">
+      <!-- Rendered by renderHUDTop() -->
+    </div>
+    <div id="hud-mission-strip">
+      <!-- Mission progress appears here during missions -->
+    </div>
   </div>
 
-  <!-- Resources Bar (horizontal scroll) -->
-  <div id="resources-bar">
-    <!-- Rendered by UI.renderResources() -->
+  <!-- Compact resource strip -->
+  <div id="hud-resources">
+    <!-- Rendered by renderResources() -->
   </div>
 
-  <!-- Tab Content Area -->
-  <div id="tab-area">
+  <!-- SCENE VIEW: fills all remaining vertical space, tap to mine -->
+  <div id="scene-view"
+    ontouchstart="onSceneTouchStart(event)"
+    onclick="onSceneClick(event)">
 
-    <!-- BASE TAB -->
-    <div class="tab-content active" id="tab-base">
-      <!-- Rendered by UI.renderBase() -->
+    <!-- Tap ripple effects injected here by JS -->
+    <div id="mine-ripple-layer"></div>
+
+    <!-- Scene art / location overlay (structures, labels) -->
+    <div id="scene-overlay">
+      <!-- Rendered by renderSceneOverlay() -->
     </div>
 
-    <!-- RESEARCH TAB -->
-    <div class="tab-content" id="tab-research">
-      <!-- Rendered by UI.renderResearch() -->
+    <!-- First-time tap hint (auto-fades) -->
+    <div id="tap-hint-wrap">
+      <div id="tap-hint">⛏ tap to mine</div>
     </div>
 
-    <!-- BUILD TAB -->
-    <div class="tab-content" id="tab-build">
-      <!-- Rendered by UI.renderBuild() -->
+  </div><!-- #scene-view -->
+
+  <!-- Mining focus selector -->
+  <div id="focus-bar">
+    <span class="focus-bar-label">FOCUS</span>
+    <div id="focus-resources-row">
+      <!-- Rendered by renderFocusBar() -->
     </div>
+  </div>
 
-    <!-- LAUNCH TAB -->
-    <div class="tab-content" id="tab-launch">
-      <!-- Rendered by UI.renderLaunch() -->
-    </div>
-
-    <!-- MAP TAB -->
-    <div class="tab-content" id="tab-map">
-      <!-- Rendered by UI.renderMap() -->
-    </div>
-
-    <!-- LOG TAB -->
-    <div class="tab-content" id="tab-log">
-      <!-- Rendered by UI.renderLog() -->
-    </div>
-
-  </div><!-- #tab-area -->
-
-  <!-- Bottom Navigation -->
+  <!-- Icon-only bottom navigation -->
   <nav id="bottom-nav">
     <button class="tab-btn active" data-tab="base">
       <span class="tab-icon">🌍</span>
-      <span class="tab-label">BASE</span>
+      <div class="tab-dot"></div>
     </button>
     <button class="tab-btn" data-tab="research">
       <span class="tab-icon">🔬</span>
-      <span class="tab-label">RESEARCH</span>
+      <div class="tab-dot"></div>
     </button>
     <button class="tab-btn" data-tab="build">
       <span class="tab-icon">🏗</span>
-      <span class="tab-label">BUILD</span>
+      <div class="tab-dot"></div>
     </button>
     <button class="tab-btn" data-tab="launch">
       <span class="tab-icon">🚀</span>
-      <span class="tab-label">LAUNCH</span>
+      <div class="tab-dot"></div>
     </button>
     <button class="tab-btn" data-tab="map">
       <span class="tab-icon">🗺</span>
-      <span class="tab-label">MAP</span>
+      <div class="tab-dot"></div>
     </button>
     <button class="tab-btn" data-tab="log">
       <span class="tab-icon">📋</span>
-      <span class="tab-label">LOG</span>
+      <div class="tab-dot"></div>
     </button>
   </nav>
+
+  <!-- ===== SLIDE-UP PANELS ===== -->
+
+  <div id="panel-research" class="slide-panel">
+    <div class="panel-handle-bar"><div class="handle-pill"></div></div>
+    <div class="panel-header">
+      <span class="panel-title">🔬 Research</span>
+      <button class="panel-close" onclick="UI.closePanel()">✕</button>
+    </div>
+    <div class="panel-scroll">
+      <div id="tab-research"></div>
+    </div>
+  </div>
+
+  <div id="panel-build" class="slide-panel">
+    <div class="panel-handle-bar"><div class="handle-pill"></div></div>
+    <div class="panel-header">
+      <span class="panel-title">🏗 Build</span>
+      <button class="panel-close" onclick="UI.closePanel()">✕</button>
+    </div>
+    <div class="panel-scroll">
+      <div id="tab-build"></div>
+    </div>
+  </div>
+
+  <div id="panel-launch" class="slide-panel">
+    <div class="panel-handle-bar"><div class="handle-pill"></div></div>
+    <div class="panel-header">
+      <span class="panel-title">🚀 Launch</span>
+      <button class="panel-close" onclick="UI.closePanel()">✕</button>
+    </div>
+    <div class="panel-scroll">
+      <div id="tab-launch"></div>
+    </div>
+  </div>
+
+  <div id="panel-map" class="slide-panel">
+    <div class="panel-handle-bar"><div class="handle-pill"></div></div>
+    <div class="panel-header">
+      <span class="panel-title">🗺 Star Map</span>
+      <button class="panel-close" onclick="UI.closePanel()">✕</button>
+    </div>
+    <div class="panel-scroll">
+      <div id="tab-map"></div>
+    </div>
+  </div>
+
+  <div id="panel-log" class="slide-panel">
+    <div class="panel-handle-bar"><div class="handle-pill"></div></div>
+    <div class="panel-header">
+      <span class="panel-title">📋 Mission Log</span>
+      <button class="panel-close" onclick="UI.closePanel()">✕</button>
+    </div>
+    <div class="panel-scroll">
+      <div id="tab-log"></div>
+    </div>
+  </div>
+
+  <!-- Panel backdrop (tap to close) -->
+  <div id="panel-backdrop" onclick="UI.closePanel()"></div>
 
 </div><!-- #app -->
 
 <!-- ============ OVERLAYS ============ -->
 
-<!-- Secret Discovery Reveal -->
 <div class="overlay" id="secret-overlay">
   <div class="overlay-box">
-    <div id="secret-content">
-      <!-- Rendered dynamically -->
-    </div>
+    <div id="secret-content"></div>
   </div>
 </div>
 
-<!-- Arrival Overlay -->
 <div class="overlay" id="arrival-overlay">
   <div class="overlay-box">
-    <div id="arrival-content">
-      <!-- Rendered dynamically -->
-    </div>
+    <div id="arrival-content"></div>
   </div>
 </div>
 
-<!-- Offline Progress Overlay -->
 <div class="overlay" id="offline-overlay">
   <div class="overlay-box">
-    <div id="offline-content">
-      <!-- Rendered dynamically -->
-    </div>
+    <div id="offline-content"></div>
   </div>
 </div>
 
-<!-- Notifications -->
 <div id="notifications"></div>
-
-<!-- Tutorial popup -->
-<div id="tutorial-popup">
-  <!-- Rendered dynamically -->
-</div>
+<div id="tutorial-popup"></div>
 
 <!-- ============ SCRIPTS ============ -->
 <script src="js/config.js"></script>

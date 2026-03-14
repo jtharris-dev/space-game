@@ -4,15 +4,17 @@
 // ============================================================
 
 const UI = (() => {
-  let activeTab = 'base';
+  let activePanel = null;    // null = scene view (base), otherwise panel id
+  let miningFocus = null;    // focused resource id for mining, null = all
   let secretRevealActive = false;
   let particleContainer = null;
   let lastRenderTime = 0;
+  let tapHintDismissed = false;
 
   // ---- INIT ----
   function init() {
     particleContainer = document.getElementById('particles');
-    bindTabNav();
+    bindNav();
     bindKeyboard();
     createStarfield();
     applyTabLocks();
@@ -20,13 +22,60 @@ const UI = (() => {
     render();
   }
 
-  function bindTabNav() {
+  // ---- NAVIGATION (panel open/close) ----
+  function bindNav() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.classList.contains('tab-locked')) return;
-        switchTab(btn.dataset.tab);
+        const tab = btn.dataset.tab;
+        if (tab === 'base') {
+          closePanel();
+        } else {
+          openPanel(tab);
+        }
       });
     });
+  }
+
+  function openPanel(panelId) {
+    closePanel(false); // close without animation lag
+
+    activePanel = panelId;
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === panelId);
+    });
+
+    const panel = document.getElementById(`panel-${panelId}`);
+    if (panel) panel.classList.add('open');
+
+    const backdrop = document.getElementById('panel-backdrop');
+    if (backdrop) backdrop.classList.add('visible');
+
+    // Render panel content
+    switch (panelId) {
+      case 'research': renderResearch(); break;
+      case 'build':    renderBuild();    break;
+      case 'launch':   renderLaunch();   break;
+      case 'map':      renderMap();      break;
+      case 'log':      renderLog();      break;
+    }
+  }
+
+  function closePanel(updateButtons = true) {
+    if (activePanel) {
+      const panel = document.getElementById(`panel-${activePanel}`);
+      if (panel) panel.classList.remove('open');
+    }
+    activePanel = null;
+
+    document.getElementById('panel-backdrop')?.classList.remove('visible');
+
+    if (updateButtons) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === 'base');
+      });
+    }
   }
 
   function applyTabLocks() {
@@ -41,15 +90,17 @@ const UI = (() => {
       } else if (wasLocked && isNowUnlocked) {
         btn.classList.remove('tab-locked');
         btn.classList.add('tab-unlocking');
-        setTimeout(() => btn.classList.remove('tab-unlocking'), 700);
+        setTimeout(() => btn.classList.remove('tab-unlocking'), 750);
       } else {
         btn.classList.remove('tab-locked');
       }
     });
 
-    // If current tab got locked somehow, fall back to base
-    const activeLocked = document.querySelector('.tab-btn.active.tab-locked');
-    if (activeLocked) switchTab('base');
+    // If open panel got locked, close it
+    if (activePanel) {
+      const btn = document.querySelector(`.tab-btn[data-tab="${activePanel}"]`);
+      if (btn && btn.classList.contains('tab-locked')) closePanel();
+    }
   }
 
   function updateScene() {
@@ -68,7 +119,6 @@ const UI = (() => {
       const locConfig = CONFIG.LOCATIONS[state.currentLocation];
       if (locConfig) {
         layer.style.setProperty('--planet-color', locConfig.color);
-        // Set up orbit planet sphere color
         const planetBg = layer.querySelector('.scene-planet-bg');
         if (planetBg) {
           planetBg.style.background = `radial-gradient(circle at 35% 35%, ${adjustColor(locConfig.color, 40)}, ${locConfig.color}, ${adjustColor(locConfig.color, -40)})`;
@@ -80,108 +130,95 @@ const UI = (() => {
 
   function bindKeyboard() {
     document.addEventListener('keydown', e => {
-      if (e.key === '1') switchTab('base');
-      if (e.key === '2') switchTab('research');
-      if (e.key === '3') switchTab('build');
-      if (e.key === '4') switchTab('launch');
-      if (e.key === '5') switchTab('map');
-      if (e.key === '6') switchTab('log');
+      if (e.key === 'Escape') closePanel();
+      if (e.key === '2') openPanel('research');
+      if (e.key === '3') openPanel('build');
+      if (e.key === '4') openPanel('launch');
+      if (e.key === '5') openPanel('map');
+      if (e.key === '6') openPanel('log');
+      if (e.key === '1') closePanel();
     });
-  }
-
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
-    });
-    document.querySelectorAll('.tab-content').forEach(el => {
-      el.classList.toggle('active', el.id === `tab-${tab}`);
-    });
-    render();
   }
 
   // ---- MAIN RENDER ----
   function render() {
-    renderHeader();
+    renderHUDTop();
     renderResources();
-    switch (activeTab) {
-      case 'base': renderBase(); break;
-      case 'research': renderResearch(); break;
-      case 'build': renderBuild(); break;
-      case 'launch': renderLaunch(); break;
-      case 'map': renderMap(); break;
-      case 'log': renderLog(); break;
+    renderSceneOverlay();
+    renderFocusBar();
+    if (activePanel) {
+      switch (activePanel) {
+        case 'research': renderResearch(); break;
+        case 'build':    renderBuild();    break;
+        case 'launch':   renderLaunch();   break;
+        case 'map':      renderMap();      break;
+        case 'log':      renderLog();      break;
+      }
     }
   }
 
   function tick(dt) {
     const now = Date.now();
-    if (now - lastRenderTime > 500) { // Update UI at 2fps for efficiency
+    if (now - lastRenderTime > 500) {
+      renderHUDTop();
       renderResources();
-      renderMissionProgress();
-      renderResearchProgress();
+      renderSceneOverlay();
+      if (activePanel === 'launch') {
+        renderMissionProgress();
+        renderResearchProgress();
+      } else if (activePanel === 'research') {
+        renderResearchProgress();
+      }
       updateScene();
       lastRenderTime = now;
     }
   }
 
-  // ---- HEADER ----
-  function renderHeader() {
+  // ---- HUD TOP ----
+  function renderHUDTop() {
     const state = State.get();
     const locId = state.currentLocation;
     const locConfig = CONFIG.LOCATIONS[locId];
     const locData = State.getLocation(locId);
 
-    const el = document.getElementById('location-header');
-    if (!el) return;
+    const locEl = document.getElementById('hud-location');
+    if (locEl) {
+      locEl.innerHTML = `
+        <span class="hud-loc-icon">${locConfig.icon}</span>
+        <span class="hud-loc-name">${locConfig.name}</span>
+        ${locData.baseBuilt ? '<span class="hud-base-dot"></span>' : ''}
+      `;
+    }
 
-    const distStr = locConfig.distance === 0 ? 'Home World' :
-      `${locConfig.distance} ${locConfig.distanceUnit || 'AU'} from Sun`;
-
-    el.innerHTML = `
-      <div class="location-badge" style="border-color: ${locConfig.color}">
-        <span class="location-icon">${locConfig.icon}</span>
-        <div class="location-info">
-          <div class="location-name">${locConfig.name}</div>
-          <div class="location-dist">${distStr}</div>
-        </div>
-        ${locData.baseBuilt ? '<span class="base-indicator">⚡ BASE</span>' : ''}
-      </div>
-      ${renderMissionProgressInline()}
-    `;
-  }
-
-  function renderMissionProgressInline() {
-    const mission = Actions.getMissionProgress();
-    if (!mission) return '';
-    const pct = Math.floor(mission.progress * 100);
-    const dest = CONFIG.LOCATIONS[mission.to];
-    const isTest = mission.purpose === 'test';
-    return `
-      <div class="mission-inline ${isTest ? 'test-mode' : ''}">
-        <div class="mission-label">
-          ${isTest ? '📡 Probe en route to' : '🚀 En route to'} ${dest ? dest.name : mission.to}
-          ${isTest ? '<span class="unmanned-tag">UNMANNED</span>' : ''}
-          — ${Actions.formatTime(mission.remaining)}
-        </div>
-        <div class="mission-bar-wrap">
-          <div class="mission-bar ${isTest ? 'probe-bar' : ''}" style="width:${pct}%"></div>
-        </div>
-      </div>
-    `;
+    const missionEl = document.getElementById('hud-mission-strip');
+    if (missionEl) {
+      const mission = Actions.getMissionProgress();
+      if (mission) {
+        const pct = Math.floor(mission.progress * 100);
+        const dest = CONFIG.LOCATIONS[mission.to];
+        const isTest = mission.purpose === 'test';
+        missionEl.innerHTML = `
+          <div class="hud-mission-row">
+            <span class="hud-mission-label">${isTest ? '📡' : '🚀'} ${dest ? dest.name : mission.to} — ${Actions.formatTime(mission.remaining)}</span>
+            <div class="hud-mission-bar-bg"><div class="hud-mission-bar ${isTest ? 'probe-bar' : ''}" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      } else {
+        missionEl.innerHTML = '';
+      }
+    }
   }
 
   // ---- RESOURCES ----
   function renderResources() {
     const state = State.get();
     const locConfig = CONFIG.LOCATIONS[state.currentLocation];
-    const container = document.getElementById('resources-bar');
+    const container = document.getElementById('hud-resources');
     if (!container) return;
 
     const production = State.getLocationProduction(state.currentLocation);
 
     const knownResources = locConfig.resources || [];
-    // Also show resources player has from other locations
     const allResources = new Set([...knownResources, ...Object.keys(state.resources).filter(r => state.resources[r] > 0)]);
 
     let html = '';
@@ -194,21 +231,18 @@ const UI = (() => {
       const max = State.getStorageMax(resId);
       const pct = Math.min(100, (amount / max) * 100);
       const rate = production[resId] || 0;
-      const rateStr = rate > 0 ? `<span class="res-rate">+${Actions.formatNumber(rate)}/s</span>` : '';
+      const rateStr = rate > 0 ? `<span class="hud-res-rate">+${Actions.formatNumber(rate)}/s</span>` : '';
 
       html += `
-        <div class="resource-chip" title="${resDef.desc}" style="--res-color: ${resDef.color}">
-          <span class="res-icon">${resDef.icon}</span>
-          <div class="res-details">
-            <div class="res-name">${resDef.name}</div>
-            <div class="res-amount">${Actions.formatNumber(amount)} ${rateStr}</div>
-            <div class="res-bar-bg"><div class="res-bar-fill" style="width:${pct}%;background:${resDef.color}"></div></div>
-          </div>
+        <div class="hud-res-chip" title="${resDef.desc}" style="--res-color: ${resDef.color}">
+          <span class="hud-res-icon">${resDef.icon}</span>
+          <span class="hud-res-amount">${Actions.formatNumber(amount)}${rateStr}</span>
+          <div class="hud-res-bar" style="width:${pct}%;background:${resDef.color}44"></div>
         </div>
       `;
     }
 
-    container.innerHTML = html || '<div class="no-resources">No resources yet. Start mining!</div>';
+    container.innerHTML = html || '';
   }
 
   // ---- BASE TAB ----
@@ -364,6 +398,126 @@ const UI = (() => {
       </div>
     `;
     return planet;
+  }
+
+  // ---- SCENE OVERLAY ----
+  function renderSceneOverlay() {
+    const state = State.get();
+    const locId = state.currentLocation;
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const locData = State.getLocation(locId);
+    const overlay = document.getElementById('scene-overlay');
+    if (!overlay) return;
+
+    if (state.activeMission) {
+      const mission = Actions.getMissionProgress();
+      const dest = CONFIG.LOCATIONS[mission.to];
+      const pct = Math.floor(mission.progress * 100);
+      const isTest = mission.purpose === 'test';
+      overlay.innerHTML = `
+        <div class="scene-travel-card">
+          <div class="stc-label">${isTest ? '📡 PROBE IN FLIGHT' : '🚀 IN TRANSIT'}</div>
+          <div class="stc-dest">${dest ? dest.icon + ' ' + dest.name : mission.to}</div>
+          <div class="stc-eta">${Actions.formatTime(mission.remaining)}</div>
+          <div class="stc-bar-bg"><div class="stc-bar ${isTest ? 'probe-bar' : ''}" style="width:${pct}%"></div></div>
+        </div>
+      `;
+      return;
+    }
+
+    // Build structures display
+    const buildings = locData.buildings || {};
+    let structHtml = '';
+    const structTypes = [
+      { id: 'base_module', icon: '🏗', label: 'Base' },
+      { id: 'auto_miner', icon: '🤖', label: 'Miner' },
+      { id: 'deep_drill', icon: '🔩', label: 'Drill' },
+      { id: 'refinery', icon: '⚗️', label: 'Refinery' },
+      { id: 'research_lab', icon: '🔬', label: 'Lab' },
+      { id: 'signal_array', icon: '📡', label: 'Array' },
+      { id: 'fusion_reactor', icon: '⚡', label: 'Reactor' },
+    ];
+
+    for (const { id, icon, label } of structTypes) {
+      const count = buildings[id] || 0;
+      if (count > 0) {
+        for (let i = 0; i < Math.min(count, 3); i++) {
+          structHtml += `<div class="scene-struct-icon" title="${label} ×${count}">${icon}</div>`;
+        }
+        if (count > 3) structHtml += `<div class="scene-struct-icon scene-struct-more">+${count - 3}</div>`;
+      }
+    }
+
+    const production = State.getLocationProduction(locId);
+    let prodStr = '';
+    if (locData.baseBuilt && Object.keys(production).length > 0) {
+      prodStr = Object.entries(production)
+        .filter(([, v]) => v > 0)
+        .map(([r, v]) => {
+          const def = CONFIG.RESOURCES[r];
+          return def ? `${def.icon} +${Actions.formatNumber(v)}/s` : '';
+        }).join('  ');
+    }
+
+    overlay.innerHTML = `
+      ${structHtml ? `<div class="scene-earth-structures">${structHtml}</div>` : ''}
+      <div class="scene-info-card">
+        <div class="sic-row">
+          <span class="sic-resources">
+            ${(locConfig.resources || []).map(r => {
+              const def = CONFIG.RESOURCES[r];
+              return def ? `<span class="sic-res" style="color:${def.color}">${def.icon}</span>` : '';
+            }).join('')}
+          </span>
+          ${prodStr ? `<span class="sic-prod">${prodStr}</span>` : ''}
+          ${locData.baseBuilt ? '<span class="sic-base">⚡ BASE</span>' : '<span class="sic-hint">tap to mine</span>'}
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- FOCUS BAR ----
+  function renderFocusBar() {
+    const state = State.get();
+    const locId = state.currentLocation;
+    const locConfig = CONFIG.LOCATIONS[locId];
+    const container = document.getElementById('focus-resources-row');
+    if (!container) return;
+
+    const resources = locConfig.resources || [];
+    if (resources.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = resources.map(resId => {
+      const def = CONFIG.RESOURCES[resId];
+      if (!def) return '';
+      const selected = miningFocus === resId;
+      return `
+        <button class="focus-chip ${selected ? 'selected' : ''}"
+          style="--focus-color: ${def.color}"
+          onclick="UI.updateMiningFocus('${resId}')">
+          <span class="focus-chip-icon">${def.icon}</span>
+          <span class="focus-chip-name">${def.name}</span>
+          ${selected ? '<span class="focus-chip-mult">2×</span>' : ''}
+        </button>
+      `;
+    }).join('');
+  }
+
+  function updateMiningFocus(resId) {
+    miningFocus = (miningFocus === resId) ? null : resId;
+    renderFocusBar();
+  }
+
+  function doMine(x, y) {
+    const state = State.get();
+    if (state.activeMission) return;
+    const gained = Actions.mine(state.currentLocation, miningFocus);
+    if (gained && Object.keys(gained).length > 0) {
+      showMineEffect(gained, x, y);
+    }
   }
 
   // ---- RESEARCH TAB ----
@@ -739,21 +893,8 @@ const UI = (() => {
       missionTime.textContent = `ETA: ${Actions.formatTime(mission.remaining)}`;
     }
 
-    // Update inline header mission
-    const inlineMission = document.querySelector('.mission-inline');
-    if (mission && !inlineMission) {
-      renderHeader();
-    } else if (!mission && inlineMission) {
-      renderHeader();
-    } else if (mission && inlineMission) {
-      const barEl = inlineMission.querySelector('.mission-bar');
-      const labelEl = inlineMission.querySelector('.mission-label');
-      if (barEl) barEl.style.width = Math.floor(mission.progress * 100) + '%';
-      if (labelEl) {
-        const dest = CONFIG.LOCATIONS[mission.to];
-        labelEl.textContent = `🚀 En route to ${dest ? dest.name : mission.to} — ${Actions.formatTime(mission.remaining)}`;
-      }
-    }
+    // Update HUD mission strip
+    renderHUDTop();
   }
 
   // ---- MAP TAB ----
@@ -919,15 +1060,23 @@ const UI = (() => {
     }, 5000);
   }
 
-  // ---- MINE CLICK EFFECT ----
-  function showMineEffect(gained) {
-    const btn = document.getElementById('mine-btn');
-    if (!btn) return;
+  // ---- MINE TAP EFFECT ----
+  function showMineEffect(gained, tapX, tapY) {
+    // Dismiss tap hint after first mine
+    if (!tapHintDismissed) {
+      tapHintDismissed = true;
+      const hint = document.getElementById('tap-hint-wrap');
+      if (hint) hint.classList.add('dismissed');
+    }
 
-    btn.classList.add('mining');
-    setTimeout(() => btn.classList.remove('mining'), 150);
+    // Use tap position or fallback to scene center
+    const scene = document.getElementById('scene-view');
+    const sceneRect = scene ? scene.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    const cx = tapX != null ? tapX : sceneRect.left + sceneRect.width / 2;
+    const cy = tapY != null ? tapY : sceneRect.top + sceneRect.height / 2;
 
-    // Floating text for each resource
+    // Floating resource text near tap
+    let offset = 0;
     for (const [resId, amount] of Object.entries(gained)) {
       if (amount < 0.01) continue;
       const def = CONFIG.RESOURCES[resId];
@@ -936,38 +1085,31 @@ const UI = (() => {
       const el = document.createElement('div');
       el.className = 'float-text';
       el.style.color = def.color;
-
-      const rect = btn.getBoundingClientRect();
-      el.style.left = (rect.left + Math.random() * rect.width) + 'px';
-      el.style.top = (rect.top - 10) + 'px';
+      el.style.left = (cx + (Math.random() - 0.5) * 40) + 'px';
+      el.style.top = (cy - 20 + offset) + 'px';
       el.textContent = `${def.icon} +${Actions.formatNumber(amount)}`;
       document.body.appendChild(el);
 
       requestAnimationFrame(() => el.classList.add('float-up'));
       setTimeout(() => el.remove(), 1200);
+      offset -= 18;
     }
 
-    // Particles
-    spawnParticles(btn);
+    // Spawn particles at tap point
+    spawnParticlesAt(cx, cy);
   }
 
-  function spawnParticles(target) {
+  function spawnParticlesAt(cx, cy) {
     if (!particleContainer) return;
-    const rect = target.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
     for (let i = 0; i < CONFIG.SETTINGS.clickParticles; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
       const angle = (Math.PI * 2 / CONFIG.SETTINGS.clickParticles) * i;
-      const dist = 30 + Math.random() * 40;
-      const tx = Math.cos(angle) * dist;
-      const ty = Math.sin(angle) * dist;
+      const dist = 20 + Math.random() * 30;
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
-      p.style.setProperty('--tx', tx + 'px');
-      p.style.setProperty('--ty', ty + 'px');
+      p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
       particleContainer.appendChild(p);
       setTimeout(() => p.remove(), 800);
     }
@@ -1079,7 +1221,7 @@ const UI = (() => {
 
   function closeArrival() {
     document.getElementById('arrival-overlay').classList.remove('active');
-    switchTab('base');
+    closePanel();
   }
 
   // ---- OFFLINE PROGRESS ----
@@ -1250,8 +1392,10 @@ const UI = (() => {
   }
 
   return {
-    init, render, tick, switchTab,
+    init, render, tick,
+    openPanel, closePanel,
     applyTabLocks, updateScene,
+    updateMiningFocus, doMine,
     showNotification, showAchievement,
     showMineEffect, showDiscovery,
     showSecretReveal, closeSecretReveal,
@@ -1264,9 +1408,36 @@ const UI = (() => {
 })();
 
 // ---- GLOBAL EVENT HANDLERS (called from inline HTML) ----
-function onMineClick() {
-  const state = State.get();
-  Actions.mine(state.currentLocation);
+
+let _lastTouchMine = 0;
+
+function onSceneTouchStart(event) {
+  // Prevent ghost click
+  _lastTouchMine = Date.now();
+  const touch = event.touches[0];
+  _doMine(touch.clientX, touch.clientY);
+}
+
+function onSceneClick(event) {
+  // Skip if touch already fired
+  if (Date.now() - _lastTouchMine < 300) return;
+  _doMine(event.clientX, event.clientY);
+}
+
+function _doMine(x, y) {
+  // Spawn ripple
+  const layer = document.getElementById('mine-ripple-layer');
+  if (layer) {
+    const ripple = document.createElement('div');
+    ripple.className = 'mine-ripple';
+    const layerRect = layer.getBoundingClientRect();
+    ripple.style.left = (x - layerRect.left) + 'px';
+    ripple.style.top = (y - layerRect.top) + 'px';
+    layer.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+  }
+
+  UI.doMine(x, y);
 }
 
 function onResearchClick(techId) {

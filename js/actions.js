@@ -6,7 +6,7 @@
 const Actions = (() => {
 
   // ---- MINING ----
-  function mine(locationId) {
+  function mine(locationId, focusResource) {
     const locConfig = CONFIG.LOCATIONS[locationId];
     if (!locConfig) return;
 
@@ -15,7 +15,11 @@ const Actions = (() => {
     const locState = State.getLocation(locationId);
 
     for (const [res, baseYield] of Object.entries(locConfig.baseYield)) {
-      const amount = baseYield * mult * (0.8 + Math.random() * 0.4); // ±20% variance
+      // Apply focus multiplier: focused res = 2×, others = 0.7×
+      const focusMult = focusResource
+        ? (res === focusResource ? 2.0 : 0.7)
+        : 1.0;
+      const amount = baseYield * mult * focusMult * (0.8 + Math.random() * 0.4);
       const max = State.getStorageMax(res);
       const current = State.getResource(res);
       const canAdd = Math.min(amount, max - current);
@@ -29,8 +33,6 @@ const Actions = (() => {
       }
     }
 
-    // Visual feedback
-    UI.showMineEffect(gained);
     return gained;
   }
 
