@@ -209,6 +209,9 @@ const Actions = (() => {
     // Consume rocket from hangar
     State.removeFromHangar(hangarId);
 
+    // Crewed: player travels. Uncrewed: send probe, player stays.
+    const isCrewedMission = rocketDef.crewed !== false;
+
     // Create mission
     state.activeMission = {
       from: state.currentLocation,
@@ -217,10 +220,14 @@ const Actions = (() => {
       rocketName: rocketDef.name,
       startTime: Date.now(),
       duration,
-      purpose: 'travel',
+      purpose: isCrewedMission ? 'travel' : 'test',
     };
 
-    UI.showNotification(`🚀 Launched! Heading to ${destConfig.name}...`, 'launch');
+    if (isCrewedMission) {
+      UI.showNotification(`🚀 Launched! Heading to ${destConfig.name}...`, 'launch');
+    } else {
+      UI.showNotification(`📡 Unmanned probe launched toward ${destConfig.name}!`, 'launch');
+    }
     UI.renderLaunch();
     UI.render();
 

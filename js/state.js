@@ -56,6 +56,12 @@ const State = (() => {
       // Achievements earned
       achievements: [],
 
+      // Progression: which tabs are unlocked
+      unlockedTabs: ['base', 'research', 'log'],
+
+      // High-level game stage for scene rendering
+      gameStage: 'earth_early',
+
       // UI state
       ui: {
         activeTab: 'base',
@@ -304,6 +310,25 @@ const State = (() => {
   }
 
   // ---- Achievement helpers ----
+  // ---- Tab unlock helpers ----
+  function getUnlockedTabs() {
+    return _state.unlockedTabs || ['base', 'research', 'log'];
+  }
+
+  function unlockTab(tabId) {
+    if (!_state.unlockedTabs) _state.unlockedTabs = ['base', 'research', 'log'];
+    if (!_state.unlockedTabs.includes(tabId)) {
+      _state.unlockedTabs.push(tabId);
+      return true; // newly unlocked
+    }
+    return false;
+  }
+
+  function setGameStage(stage) {
+    _state.gameStage = stage;
+  }
+
+  // ---- Achievement helpers ----
   function grantAchievement(achievementId) {
     if (!_state.achievements.includes(achievementId)) {
       _state.achievements.push(achievementId);
@@ -326,5 +351,6 @@ const State = (() => {
     addToHangar, removeFromHangar,
     getLocationProduction,
     grantAchievement, hasAchievement,
+    getUnlockedTabs, unlockTab, setGameStage,
   };
 })();

@@ -28,6 +28,7 @@ const CONFIG = {
     quantumDust:   { name: 'Quantum Dust',  icon: '✨', color: '#ff88ff', desc: 'Entangled particle clouds' },
     antimatter:    { name: 'Antimatter',    icon: '⊛',  color: '#ff2200', desc: 'Annihilation fuel' },
     voidEssence:   { name: 'Void Essence',  icon: '◈',  color: '#110022', desc: 'Essence of nothingness' },
+    flightData:    { name: 'Flight Data',   icon: '📊', color: '#44aaff', desc: 'Telemetry from unmanned test missions' },
   },
 
   // ---- LOCATIONS ----
@@ -386,7 +387,8 @@ const CONFIG = {
     rocket_basic: {
       name: 'Chemical Rocket',
       icon: '🚀', tier: 1,
-      desc: 'Basic chemical propulsion. Short range.',
+      crewed: false,
+      desc: 'Unmanned probe rocket. Too primitive for a human crew. Sends a probe to collect samples and data.',
       cost: { iron: 150, silicon: 80, carbon: 40 },
       buildTime: 60,
       range: ['moon'],
@@ -395,7 +397,7 @@ const CONFIG = {
     rocket_ion: {
       name: 'Ion Drive Ship',
       icon: '⚡', tier: 2,
-      desc: 'Efficient ion drive for inner solar system travel.',
+      desc: 'First crewed spacecraft. Efficient ion drive for inner solar system travel.',
       cost: { iron: 300, silicon: 200, helium3: 80, titanium: 50 },
       buildTime: 120,
       range: ['moon', 'mars'],

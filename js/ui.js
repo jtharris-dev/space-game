@@ -15,13 +15,67 @@ const UI = (() => {
     bindTabNav();
     bindKeyboard();
     createStarfield();
+    applyTabLocks();
+    updateScene();
     render();
   }
 
   function bindTabNav() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('tab-locked')) return;
+        switchTab(btn.dataset.tab);
+      });
     });
+  }
+
+  function applyTabLocks() {
+    const unlocked = State.getUnlockedTabs();
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const tab = btn.dataset.tab;
+      const wasLocked = btn.classList.contains('tab-locked');
+      const isNowUnlocked = unlocked.includes(tab);
+
+      if (!isNowUnlocked) {
+        btn.classList.add('tab-locked');
+      } else if (wasLocked && isNowUnlocked) {
+        btn.classList.remove('tab-locked');
+        btn.classList.add('tab-unlocking');
+        setTimeout(() => btn.classList.remove('tab-unlocking'), 700);
+      } else {
+        btn.classList.remove('tab-locked');
+      }
+    });
+
+    // If current tab got locked somehow, fall back to base
+    const activeLocked = document.querySelector('.tab-btn.active.tab-locked');
+    if (activeLocked) switchTab('base');
+  }
+
+  function updateScene() {
+    const state = State.get();
+    const layer = document.getElementById('scene-layer');
+    if (!layer) return;
+
+    layer.className = '';
+
+    if (state.activeMission) {
+      layer.classList.add('scene-travel');
+    } else if (state.currentLocation === 'earth') {
+      layer.classList.add('scene-earth');
+    } else {
+      layer.classList.add('scene-space');
+      const locConfig = CONFIG.LOCATIONS[state.currentLocation];
+      if (locConfig) {
+        layer.style.setProperty('--planet-color', locConfig.color);
+        // Set up orbit planet sphere color
+        const planetBg = layer.querySelector('.scene-planet-bg');
+        if (planetBg) {
+          planetBg.style.background = `radial-gradient(circle at 35% 35%, ${adjustColor(locConfig.color, 40)}, ${locConfig.color}, ${adjustColor(locConfig.color, -40)})`;
+          planetBg.style.boxShadow = `0 0 60px ${locConfig.color}55, 0 0 120px ${locConfig.color}22`;
+        }
+      }
+    }
   }
 
   function bindKeyboard() {
@@ -66,6 +120,7 @@ const UI = (() => {
       renderResources();
       renderMissionProgress();
       renderResearchProgress();
+      updateScene();
       lastRenderTime = now;
     }
   }
@@ -101,10 +156,17 @@ const UI = (() => {
     if (!mission) return '';
     const pct = Math.floor(mission.progress * 100);
     const dest = CONFIG.LOCATIONS[mission.to];
+    const isTest = mission.purpose === 'test';
     return `
-      <div class="mission-inline">
-        <div class="mission-label">🚀 En route to ${dest ? dest.name : mission.to} — ${Actions.formatTime(mission.remaining)}</div>
-        <div class="mission-bar-wrap"><div class="mission-bar" style="width:${pct}%"></div></div>
+      <div class="mission-inline ${isTest ? 'test-mode' : ''}">
+        <div class="mission-label">
+          ${isTest ? '📡 Probe en route to' : '🚀 En route to'} ${dest ? dest.name : mission.to}
+          ${isTest ? '<span class="unmanned-tag">UNMANNED</span>' : ''}
+          — ${Actions.formatTime(mission.remaining)}
+        </div>
+        <div class="mission-bar-wrap">
+          <div class="mission-bar ${isTest ? 'probe-bar' : ''}" style="width:${pct}%"></div>
+        </div>
       </div>
     `;
   }
@@ -155,10 +217,8 @@ const UI = (() => {
     const locId = state.currentLocation;
     const locConfig = CONFIG.LOCATIONS[locId];
     const locData = State.getLocation(locId);
-
     const container = document.getElementById('tab-base');
 
-    const autoMinerCount = State.getBuildingCount(locId, 'auto_miner');
     const production = State.getLocationProduction(locId);
     const hasAutoMine = State.hasResearched('solar_panels');
 
@@ -172,7 +232,82 @@ const UI = (() => {
         }).join('  ');
     }
 
-    container.innerHTML = `
+    if (locId === 'earth') {
+      container.innerHTML = renderEarthSurface(locConfig, locData, prodStr, hasAutoMine);
+    } else {
+      container.innerHTML = renderPlanetBase(locId, locConfig, locData, prodStr, hasAutoMine);
+    }
+  }
+
+  function renderEarthSurface(locConfig, locData, prodStr, hasAutoMine) {
+    const buildings = locData.buildings || {};
+    const minerCount = buildings['auto_miner'] || 0;
+    const hasBase = locData.baseBuilt;
+    const hasDrill = buildings['deep_drill'] || 0;
+
+    // Build surface structures display
+    let structureIcons = '';
+    if (hasBase) structureIcons += '<div class="surface-struct" title="Base Module">🏗</div>';
+    for (let i = 0; i < Math.min(4, minerCount); i++) {
+      structureIcons += '<div class="surface-struct miner-icon" title="Auto-Miner">🤖</div>';
+    }
+    for (let i = 0; i < Math.min(2, hasDrill); i++) {
+      structureIcons += '<div class="surface-struct" title="Deep Drill">🔩</div>';
+    }
+
+    return `
+      <div class="surface-view">
+
+        <div class="surface-scene-panel">
+          <div class="surface-sky-region">
+            <div class="surface-star-dots">· · · · ·</div>
+            <div class="surface-atmos-curve"></div>
+          </div>
+          <div class="surface-ground-region">
+            ${structureIcons ? `<div class="surface-structures">${structureIcons}</div>` : ''}
+            <div class="surface-ground-line"></div>
+          </div>
+        </div>
+
+        <div class="surface-status-bar">
+          <span class="surface-loc-label">📍 Earth — Surface Operations</span>
+          ${hasBase ? '<span class="surface-base-badge">⚡ BASE</span>' : ''}
+        </div>
+
+        <div class="location-desc">${locConfig.description}</div>
+
+        <div class="available-resources">
+          <h3>Surface Resources</h3>
+          <div class="resource-tags">
+            ${locConfig.resources.map(r => {
+              const def = CONFIG.RESOURCES[r];
+              return def ? `<span class="res-tag" style="border-color:${def.color}">${def.icon} ${def.name}</span>` : '';
+            }).join('')}
+          </div>
+        </div>
+
+        <button class="mine-btn" id="mine-btn" onclick="onMineClick()">
+          <span class="mine-icon">⛏</span>
+          <span class="mine-text">EXCAVATE</span>
+          <span class="mine-sub">tap to extract resources</span>
+        </button>
+
+        ${locData.baseBuilt && prodStr ? `
+          <div class="auto-prod">
+            <span class="auto-label">⚡ Auto-production:</span>
+            <span class="auto-rates">${prodStr}</span>
+          </div>
+        ` : ''}
+
+        ${!locData.baseBuilt && hasAutoMine ? `
+          <div class="hint-box">💡 Build a <strong>Base Module</strong> in the Build tab to enable auto-mining here.</div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function renderPlanetBase(locId, locConfig, locData, prodStr, hasAutoMine) {
+    return `
       <div class="base-view">
         <div class="planet-visual">
           ${renderPlanet(locId)}
@@ -472,18 +607,20 @@ const UI = (() => {
     if (mission) {
       const dest = CONFIG.LOCATIONS[mission.to];
       const pct = Math.floor(mission.progress * 100);
+      const isTest = mission.purpose === 'test';
       html += `
-        <div class="active-mission">
-          <div class="mission-title">🚀 ACTIVE MISSION</div>
+        <div class="active-mission ${isTest ? 'test-mission-active' : ''}">
+          <div class="mission-title">${isTest ? '📡 TEST PROBE MISSION' : '🚀 CREWED MISSION'}</div>
           <div class="mission-detail">
             <span>${CONFIG.LOCATIONS[mission.from]?.icon} ${CONFIG.LOCATIONS[mission.from]?.name}</span>
             <span class="mission-arrow">→→→</span>
             <span>${dest?.icon} ${dest?.name}</span>
           </div>
           <div class="mission-rocket">${CONFIG.ROCKETS[mission.rocketId]?.icon || '🚀'} ${mission.rocketName}</div>
+          ${isTest ? '<div class="mission-note">🤖 Unmanned — probe will return with samples & flight data</div>' : ''}
           <div class="mission-time">ETA: ${Actions.formatTime(mission.remaining)}</div>
           <div class="mission-bar-wrap big">
-            <div class="mission-bar" style="width:${pct}%">
+            <div class="mission-bar ${isTest ? 'probe-bar' : ''}" style="width:${pct}%">
               <div class="thruster-glow"></div>
             </div>
           </div>
@@ -499,12 +636,13 @@ const UI = (() => {
       html += '<div class="hangar-list">';
       for (const entry of state.hangar) {
         const rDef = CONFIG.ROCKETS[entry.rocketId];
-        html += `
-          <div class="hangar-entry">
+        const isUnmanned = rDef.crewed === false;
+      html += `
+          <div class="hangar-entry ${isUnmanned ? 'unmanned-entry' : ''}">
             <div class="rocket-display">
               <span class="rocket-icon-lg">${rDef.icon}</span>
               <div>
-                <div class="rocket-name">${rDef.name}</div>
+                <div class="rocket-name">${rDef.name}${isUnmanned ? ' <span class="unmanned-badge">🤖 PROBE</span>' : ''}</div>
                 <div class="rocket-desc">${rDef.desc}</div>
               </div>
             </div>
@@ -530,6 +668,7 @@ const UI = (() => {
 
   function renderLaunchTargets(entry, rDef, state) {
     const currentLoc = state.currentLocation;
+    const isUnmanned = rDef.crewed === false;
     const allLocs = rDef.range === null
       ? Object.keys(CONFIG.LOCATIONS)
       : (rDef.range || []);
@@ -539,11 +678,14 @@ const UI = (() => {
       .map(locId => {
         const lDef = CONFIG.LOCATIONS[locId];
         const disabled = !!state.activeMission;
+        const label = isUnmanned
+          ? `📡 Launch probe → ${lDef.icon} ${lDef.name}`
+          : `${lDef.icon} ${lDef.name}`;
         return `
-          <button class="launch-target-btn ${disabled ? 'disabled' : ''}"
+          <button class="launch-target-btn ${disabled ? 'disabled' : ''} ${isUnmanned ? 'probe-target' : ''}"
             onclick="onLaunchClick(${entry.id}, '${locId}')"
             ${disabled ? 'disabled' : ''}>
-            ${lDef.icon} ${lDef.name}
+            ${label}
           </button>
         `;
       }).join('') || '<span class="no-targets">No reachable destinations</span>';
@@ -831,6 +973,22 @@ const UI = (() => {
     }
   }
 
+  // ---- TEST MISSION RESULT ----
+  function showTestMissionResult(locId, gained) {
+    const loc = CONFIG.LOCATIONS[locId];
+    const gainsList = Object.entries(gained)
+      .filter(([, v]) => v > 0.01)
+      .map(([r, v]) => {
+        const def = CONFIG.RESOURCES[r];
+        return def ? `${def.icon} +${Actions.formatNumber(v)}` : '';
+      }).filter(Boolean).join(' · ');
+
+    showNotification(
+      `📡 Data received from ${loc ? loc.name : locId}: ${gainsList}`,
+      'success'
+    );
+  }
+
   // ---- DISCOVERY REVEAL ----
   function showDiscovery(techId) {
     const tech = CONFIG.TECHS[techId];
@@ -961,7 +1119,13 @@ const UI = (() => {
     canvas.height = window.innerHeight;
 
     const stars = [];
-    const numStars = 200;
+    const numStars = 260;
+
+    function resetStar(star, cx, cy) {
+      // For travel mode: start near center
+      star.x = cx + (Math.random() - 0.5) * 10;
+      star.y = cy + (Math.random() - 0.5) * 10;
+    }
 
     for (let i = 0; i < numStars; i++) {
       stars.push({
@@ -969,28 +1133,77 @@ const UI = (() => {
         y: Math.random() * canvas.height,
         r: Math.random() * 1.5 + 0.3,
         alpha: Math.random() * 0.8 + 0.2,
-        speed: Math.random() * 0.3 + 0.05,
         twinkleSpeed: Math.random() * 0.02 + 0.005,
         twinkleOffset: Math.random() * Math.PI * 2,
       });
     }
 
-    let animFrame;
     function draw() {
+      const state = window.State ? State.get() : null;
+      const traveling = state && state.activeMission;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const t = Date.now() / 1000;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
 
-      for (const star of stars) {
-        const twinkle = 0.5 + 0.5 * Math.sin(t * star.twinkleSpeed * 100 + star.twinkleOffset);
-        ctx.globalAlpha = star.alpha * (0.5 + twinkle * 0.5);
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        ctx.fill();
+      if (traveling) {
+        // Travel mode: stars burst outward from center like warp speed
+        for (const star of stars) {
+          const dx = star.x - cx;
+          const dy = star.y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+          // Accelerate based on distance from center
+          const speed = 1.5 + (dist / Math.max(canvas.width, canvas.height)) * 12;
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          // Save old position for streak
+          const ox = star.x;
+          const oy = star.y;
+
+          star.x += nx * speed;
+          star.y += ny * speed;
+
+          // Wrap: if off screen, reset near center
+          if (star.x < 0 || star.x > canvas.width || star.y < 0 || star.y > canvas.height) {
+            resetStar(star, cx, cy);
+            continue;
+          }
+
+          // Draw streak from old position to new
+          const streakLen = Math.min(25, speed * 5);
+          ctx.globalAlpha = 0.5 + (dist / canvas.width) * 0.5;
+          ctx.strokeStyle = dist < 80 ? 'rgba(180,220,255,0.6)' : '#aaccff';
+          ctx.lineWidth = star.r * 0.6;
+          ctx.beginPath();
+          ctx.moveTo(star.x, star.y);
+          ctx.lineTo(star.x - nx * streakLen, star.y - ny * streakLen);
+          ctx.stroke();
+        }
+
+        // Central glow (warp core)
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+        gradient.addColorStop(0, 'rgba(100,200,255,0.08)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      } else {
+        // Normal mode: twinkling stationary stars
+        for (const star of stars) {
+          const twinkle = 0.5 + 0.5 * Math.sin(t * star.twinkleSpeed * 100 + star.twinkleOffset);
+          ctx.globalAlpha = star.alpha * (0.5 + twinkle * 0.5);
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       ctx.globalAlpha = 1;
-      animFrame = requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
     }
 
     draw();
@@ -1038,11 +1251,13 @@ const UI = (() => {
 
   return {
     init, render, tick, switchTab,
+    applyTabLocks, updateScene,
     showNotification, showAchievement,
     showMineEffect, showDiscovery,
     showSecretReveal, closeSecretReveal,
     showArrival, closeArrival,
     showOfflineProgress,
+    showTestMissionResult,
     renderResearch, renderLaunch,
     onMapNodeClick,
   };

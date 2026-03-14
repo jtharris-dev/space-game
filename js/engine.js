@@ -43,6 +43,9 @@ const Engine = (() => {
     // Check achievements
     checkAchievements();
 
+    // Check tab unlocks (progressive menu)
+    checkTabUnlocks();
+
     // Update UI
     if (window.UI) UI.tick(dt);
   }
@@ -138,18 +141,74 @@ const Engine = (() => {
     const state = State.get();
     state.activeMission = null;
     state.stats.totalLaunches++;
+    state.missionsCompleted.push({ to: mission.to, purpose: mission.purpose, time: Date.now() });
 
-    if (mission.purpose === 'travel') {
-      // Move player to new location
+    if (mission.purpose === 'test') {
+      // Unmanned probe: collect samples and data, player stays on Earth
+      const destConfig = CONFIG.LOCATIONS[mission.to];
+      const gained = {};
+
+      // Always gain some flight data
+      const dataAmount = 3 + Math.random() * 5;
+      State.addResource('flightData', dataAmount);
+      gained.flightData = dataAmount;
+
+      // Gain a small sample of the destination's resources
+      if (destConfig && destConfig.baseYield) {
+        for (const [res, baseRate] of Object.entries(destConfig.baseYield)) {
+          const amount = baseRate * (0.5 + Math.random() * 1.5);
+          const max = State.getStorageMax(res);
+          const current = State.getResource(res);
+          const canAdd = Math.min(amount, max - current);
+          if (canAdd > 0.01) {
+            State.addResource(res, canAdd);
+            gained[res] = canAdd;
+          }
+        }
+      }
+
+      UI.showNotification(`📡 Probe returned from ${destConfig?.name || mission.to}!`, 'success');
+      UI.showTestMissionResult(mission.to, gained);
+      UI.render();
+
+    } else if (mission.purpose === 'travel') {
+      // Crewed mission: move player to new location
       state.currentLocation = mission.to;
       State.visitLocation(mission.to);
 
       const locConfig = CONFIG.LOCATIONS[mission.to];
-      state.missionsCompleted.push({ to: mission.to, time: Date.now() });
+      State.setGameStage('in_space');
 
       UI.showNotification(`🚀 Arrived at ${locConfig.name}!`, 'success');
       UI.showArrival(mission.to);
       UI.render();
+    }
+  }
+
+  function checkTabUnlocks() {
+    // Build tab: unlocks when solar_panels researched (enables auto-miners)
+    if (State.hasResearched('solar_panels') || State.hasResearched('base_construction')) {
+      if (State.unlockTab('build')) {
+        UI.showNotification('🔓 BUILD tab unlocked — construct buildings!', 'success');
+        UI.applyTabLocks();
+      }
+    }
+
+    // Launch tab: unlocks when chemical_rockets researched
+    if (State.hasResearched('chemical_rockets')) {
+      if (State.unlockTab('launch')) {
+        UI.showNotification('🚀 LAUNCH tab unlocked — build and launch rockets!', 'success');
+        UI.applyTabLocks();
+      }
+    }
+
+    // Map tab: unlocks after first mission completed
+    const state = State.get();
+    if (state.stats.totalLaunches > 0) {
+      if (State.unlockTab('map')) {
+        UI.showNotification('🗺 MAP tab unlocked — chart your journey!', 'success');
+        UI.applyTabLocks();
+      }
     }
   }
 
