@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#06080f">
@@ -15,12 +15,9 @@
 <!-- Starfield background canvas (always behind everything) -->
 <canvas id="starfield"></canvas>
 
-<!-- Atmospheric scene layer -->
+<!-- Photorealistic scene canvas (fills #scene-view) -->
+<!-- Scene layer: only used for travel warp overlay now -->
 <div id="scene-layer">
-  <div class="scene-atmos-gradient"></div>
-  <div class="scene-ground-plane"></div>
-  <div class="scene-horizon-glow"></div>
-  <div class="scene-planet-bg"></div>
   <div class="scene-speed-overlay"></div>
 </div>
 
@@ -58,6 +55,9 @@
   <div id="scene-view"
     ontouchstart="onSceneTouchStart(event)"
     onclick="onSceneClick(event)">
+
+    <!-- Photorealistic surface canvas (rendered by scenes.js) -->
+    <canvas id="scene-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
     <!-- Tap ripple effects injected here by JS -->
     <div id="mine-ripple-layer"></div>
@@ -196,6 +196,7 @@
 <div id="tutorial-popup"></div>
 
 <!-- ============ SCRIPTS ============ -->
+<script src="js/scenes.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/engine.js"></script>

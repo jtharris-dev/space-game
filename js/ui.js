@@ -18,6 +18,7 @@ const UI = (() => {
     bindKeyboard();
     createStarfield();
     applyTabLocks();
+    Scenes.init();
     updateScene();
     render();
   }
@@ -106,25 +107,14 @@ const UI = (() => {
   function updateScene() {
     const state = State.get();
     const layer = document.getElementById('scene-layer');
-    if (!layer) return;
-
-    layer.className = '';
+    if (layer) {
+      layer.className = state.activeMission ? 'scene-travel' : '';
+    }
 
     if (state.activeMission) {
-      layer.classList.add('scene-travel');
-    } else if (state.currentLocation === 'earth') {
-      layer.classList.add('scene-earth');
+      Scenes.stopAnimation();
     } else {
-      layer.classList.add('scene-space');
-      const locConfig = CONFIG.LOCATIONS[state.currentLocation];
-      if (locConfig) {
-        layer.style.setProperty('--planet-color', locConfig.color);
-        const planetBg = layer.querySelector('.scene-planet-bg');
-        if (planetBg) {
-          planetBg.style.background = `radial-gradient(circle at 35% 35%, ${adjustColor(locConfig.color, 40)}, ${locConfig.color}, ${adjustColor(locConfig.color, -40)})`;
-          planetBg.style.boxShadow = `0 0 60px ${locConfig.color}55, 0 0 120px ${locConfig.color}22`;
-        }
-      }
+      Scenes.startAnimation(state.currentLocation);
     }
   }
 
