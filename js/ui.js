@@ -107,13 +107,29 @@ const UI = (() => {
   function updateScene() {
     const state = State.get();
     const layer = document.getElementById('scene-layer');
-    if (layer) {
-      layer.className = state.activeMission ? 'scene-travel' : '';
-    }
+    if (layer) layer.className = '';
 
-    if (state.activeMission) {
-      Scenes.stopAnimation();
+    if (state.activeMission && state.activeMission.purpose !== 'test') {
+      // Crewed mission — show rocket launch + warp
+      const hasRocket = state.hangar && state.hangar.length > 0;
+      Scenes.setMission(state.activeMission, hasRocket);
+      // Screen shake during first few seconds of launch animation
+      const elapsed = (Date.now() - state.activeMission.startTime) / 1000;
+      const app = document.getElementById('app');
+      if (app) {
+        if (elapsed < 8) {
+          app.classList.add('launching');
+        } else {
+          app.classList.remove('launching');
+        }
+      }
     } else {
+      // On surface
+      if (document.getElementById('app')) {
+        document.getElementById('app').classList.remove('launching');
+      }
+      const hasRocket = state.hangar && state.hangar.length > 0;
+      Scenes.setHasRocket(hasRocket);
       Scenes.startAnimation(state.currentLocation);
     }
   }

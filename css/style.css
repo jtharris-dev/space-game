@@ -1492,3 +1492,334 @@ html, body {
 .mission-inline.test-mode .mission-bar {
   background: linear-gradient(90deg, #ff8800, #ffcc44);
 }
+
+/* ============================================================
+   COCKPIT WINDOW FRAME
+   ============================================================ */
+
+#cockpit-frame {
+  position: absolute; inset: 0; z-index: 5;
+  pointer-events: none;
+  /* Deep vignette — makes the scene look like a porthole */
+  box-shadow:
+    inset 0 0 80px rgba(0,4,18,0.82),
+    inset 0 0 28px rgba(0,20,60,0.50),
+    inset 0 3px 0   rgba(0,120,220,0.12); /* sky reflection on glass */
+}
+
+/* Glass reflection streak — top-left */
+#cockpit-frame::before {
+  content: '';
+  position: absolute;
+  top: 3%; left: 4%; width: 24%; height: 9%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.055) 0%, transparent 100%);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+
+/* Subtle scan-line pass */
+#cockpit-frame::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; height: 2px;
+  background: linear-gradient(to right,
+    transparent 0%, rgba(0,210,255,0.06) 30%,
+    rgba(0,210,255,0.10) 50%, rgba(0,210,255,0.06) 70%, transparent 100%);
+  animation: cf-scan 12s linear infinite;
+  pointer-events: none;
+}
+@keyframes cf-scan {
+  0%   { top: -2px; opacity: 0; }
+  4%   { opacity: 1; }
+  96%  { opacity: 0.6; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Corner bracket indicators */
+.cframe-corner {
+  position: absolute;
+  width: 24px; height: 24px;
+  border-color: rgba(0,188,255,0.32);
+  border-style: solid;
+  animation: cf-pulse 4s ease-in-out infinite;
+}
+.cframe-corner.tl { top: 10px;    left: 10px;    border-width: 2px 0 0 2px; }
+.cframe-corner.tr { top: 10px;    right: 10px;   border-width: 2px 2px 0 0; }
+.cframe-corner.bl { bottom: 10px; left: 10px;    border-width: 0 0 2px 2px; }
+.cframe-corner.br { bottom: 10px; right: 10px;   border-width: 0 2px 2px 0; }
+@keyframes cf-pulse {
+  0%,100% { border-color: rgba(0,188,255,0.28); }
+  50%     { border-color: rgba(0,220,255,0.50); }
+}
+
+/* ============================================================
+   HUD OVERHAUL — cockpit instrument theme
+   ============================================================ */
+
+#hud-top {
+  background: linear-gradient(to bottom,
+    rgba(2,4,14,0.96) 0%, rgba(3,6,18,0.82) 100%);
+  border-bottom: 1px solid rgba(0,160,255,0.10);
+}
+
+#hud-location { gap: 8px; }
+.hud-loc-name {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(0,210,255,0.45);
+}
+.hud-loc-icon { font-size: 1.1rem; }
+
+/* Mission bar — thinner, more elegant */
+.hud-mission-row { gap: 6px; }
+.hud-mission-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+  color: rgba(140,200,255,0.82);
+}
+.hud-mission-bar-bg {
+  height: 3px;
+  background: rgba(0,60,120,0.4);
+  border-radius: 2px;
+  overflow: hidden;
+  flex: 1;
+}
+.hud-mission-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #0060c0, #00d4ff);
+  box-shadow: 0 0 6px rgba(0,212,255,0.5);
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+.probe-bar {
+  background: linear-gradient(90deg, #c06000, #ffcc44) !important;
+  box-shadow: 0 0 6px rgba(255,160,40,0.5) !important;
+}
+
+/* Resource strip */
+#hud-resources {
+  background: linear-gradient(to bottom,
+    rgba(2,5,16,0.92) 0%, rgba(3,7,20,0.78) 100%);
+  border-bottom: 1px solid rgba(0,100,200,0.10);
+}
+.hud-res-chip {
+  background: rgba(4,10,28,0.85);
+  border: 1px solid rgba(0,140,220,0.18);
+  font-family: 'Courier New', monospace;
+}
+.hud-res-amount {
+  font-size: 0.78rem;
+  color: rgba(200,225,255,0.90);
+  letter-spacing: 0.3px;
+}
+.hud-res-rate { color: rgba(0,220,130,0.85); font-size: 0.65rem; }
+
+/* Focus bar */
+#focus-bar {
+  background: rgba(2,5,16,0.90);
+  border-top: 1px solid rgba(0,100,200,0.12);
+}
+.focus-bar-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: rgba(0,160,255,0.5);
+}
+
+/* ============================================================
+   PANEL OVERHAUL — mission briefing aesthetic
+   ============================================================ */
+
+.slide-panel {
+  background: rgba(3,6,20,0.97);
+  border-top: 1px solid rgba(0,140,255,0.18);
+}
+
+.panel-header {
+  border-bottom: 1px solid rgba(0,100,200,0.15);
+  background: rgba(2,5,16,0.6);
+}
+.panel-title {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(0,210,255,0.30);
+}
+.panel-close {
+  background: rgba(0,80,160,0.15);
+  border: 1px solid rgba(0,140,220,0.20);
+  color: rgba(100,180,255,0.65);
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.panel-close:hover { background: rgba(0,120,220,0.3); color: var(--cyan); }
+
+/* Handle pill — subtle */
+.handle-pill {
+  background: rgba(0,140,255,0.20);
+  border-radius: 2px;
+}
+
+/* ============================================================
+   TECH & BUILD CARDS — holographic display feel
+   ============================================================ */
+
+.tech-card {
+  background: rgba(4,10,30,0.85);
+  border-color: rgba(0,100,200,0.22);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tech-card:hover, .tech-card:active {
+  border-color: rgba(0,180,255,0.45);
+  box-shadow: 0 0 12px rgba(0,160,255,0.12);
+}
+.tech-card.researching {
+  border-color: rgba(0,210,255,0.50);
+  box-shadow: 0 0 16px rgba(0,210,255,0.15);
+}
+
+.build-card {
+  background: rgba(4,10,30,0.85);
+  border-color: rgba(0,100,200,0.22);
+}
+.build-card:hover, .build-card:active {
+  border-color: rgba(0,180,255,0.45);
+  box-shadow: 0 0 10px rgba(0,160,255,0.10);
+}
+
+/* Tier headers — like mission category labels */
+.tech-tier-header {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  font-size: 0.60rem;
+  color: rgba(0,180,255,0.45);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SCENE OVERLAY — info card refinement
+   ============================================================ */
+
+.scene-info-card {
+  background: rgba(3,7,22,0.88);
+  border: 1px solid rgba(0,120,220,0.20);
+  backdrop-filter: blur(10px);
+  font-family: 'Courier New', monospace;
+}
+.scene-loc-name {
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--cyan);
+}
+
+/* Travel card during missions */
+.travel-card {
+  background: rgba(3,7,22,0.88);
+  border: 1px solid rgba(0,150,255,0.22);
+  font-family: 'Courier New', monospace;
+}
+.travel-dest-name {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* ============================================================
+   NOTIFICATION OVERHAUL
+   ============================================================ */
+
+.notif-item {
+  background: rgba(4,10,28,0.95);
+  border-left: 3px solid var(--cyan);
+  border-top: 1px solid rgba(0,140,220,0.20);
+  border-bottom: 1px solid rgba(0,80,160,0.15);
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 24px rgba(0,0,20,0.6), 0 0 12px rgba(0,140,255,0.08);
+}
+
+/* ============================================================
+   BOTTOM NAV — cockpit instrument buttons
+   ============================================================ */
+
+#bottom-nav {
+  background: rgba(2,4,14,0.98);
+  border-top: 1px solid rgba(0,100,200,0.18);
+}
+.tab-btn {
+  border-right: 1px solid rgba(0,60,120,0.18);
+}
+.tab-btn:last-child { border-right: none; }
+.tab-btn.active {
+  background: rgba(0,60,140,0.22);
+}
+.tab-icon { font-size: 1.3rem !important; }
+
+/* Locked tabs look like powered-off instruments */
+.tab-btn.tab-locked {
+  opacity: 0.08 !important;
+  filter: grayscale(1) brightness(0.4) !important;
+}
+
+/* ============================================================
+   MINE RIPPLE — more energetic
+   ============================================================ */
+
+.mine-ripple {
+  border: 2px solid rgba(0,200,255,0.6);
+  box-shadow: 0 0 12px rgba(0,200,255,0.3), inset 0 0 8px rgba(0,200,255,0.1);
+}
+
+/* Mining hit float text */
+.mine-float {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px currentColor;
+}
+
+/* ============================================================
+   ROCKET / LAUNCH OVERLAY
+   ============================================================ */
+
+/* Screen shake during launch (added via JS) */
+@keyframes launch-shake {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  15%  { transform: translate(-3px, 2px) rotate(-0.4deg); }
+  30%  { transform: translate(3px, -1px) rotate(0.3deg); }
+  45%  { transform: translate(-2px, 3px) rotate(-0.2deg); }
+  60%  { transform: translate(2px, -2px) rotate(0.4deg); }
+  75%  { transform: translate(-1px, 1px) rotate(-0.3deg); }
+}
+#app.launching {
+  animation: launch-shake 0.35s ease-in-out infinite;
+}
+
+/* ============================================================
+   TAP HINT — subtle cockpit style
+   ============================================================ */
+
+#tap-hint {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,200,255,0.55);
+  text-shadow: 0 0 8px rgba(0,200,255,0.3);
+  border: 1px solid rgba(0,180,255,0.18);
+  background: rgba(0,10,30,0.45);
+  padding: 6px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
