@@ -15,7 +15,7 @@ const State = (() => {
       playTime: 0,
 
       // Resources: { resourceId: amount }
-      resources: { iron: 10, silicon: 5 },
+      resources: { iron: 50, silicon: 25 },
 
       // Per-location data
       locations: {

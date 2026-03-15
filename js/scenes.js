@@ -377,11 +377,20 @@ const Scenes = (() => {
     }
   }
 
+  // Ground level (fraction of h) per location — must match SCENES definitions
+  const GROUND_FRAC = {
+    earth: 0.72, moon: 0.66, mars: 0.63, asteroidBelt: 0.60,
+    jupiter: 0.82, europa: 0.67, saturn: 0.65, titan: 0.64,
+    uranus: 0.67, neptune: 0.70, kuiperBelt: 0.64, proxima: 0.64,
+    proximaB: 0.63, alphaCentauri: 0.67, voidNexus: 0.64,
+  };
+
   // ── Idle rocket on pad (pre-launch) ──────────────────────
   function renderRocketOnPad(w, h, locId) {
     // Render planet surface first (scene handles that in caller)
     // Draw a launch pad platform then rocket on top
-    const padY = h * 0.73;
+    const gf = GROUND_FRAC[locId] || 0.70;
+    const padY = h * gf;
     const padW = 60, padH = 8;
 
     // Pad platform
@@ -1088,6 +1097,10 @@ const Scenes = (() => {
     if (!missionData || missionData.startTime !== mission.startTime) {
       missionData = mission;
       missionAnimT0 = performance.now();
+    }
+    if (!animFrame) {
+      lastAnimTime = performance.now();
+      animFrame = requestAnimationFrame(frame);
     }
   }
 
