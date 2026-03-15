@@ -427,7 +427,7 @@ html, body {
 /* ---- BOTTOM NAV (icon only) ---- */
 #bottom-nav {
   flex-shrink: 0; display: flex;
-  position: relative; z-index: 45;
+  position: relative; z-index: 60;
   background: rgba(3,4,13,0.97);
   border-top: 1px solid rgba(10,20,48,0.9);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -456,7 +456,9 @@ html, body {
 /* ---- SLIDE-UP PANELS ---- */
 .slide-panel {
   position: absolute;
-  bottom: calc(58px + env(safe-area-inset-bottom)); left: 0; right: 0; height: 80%;
+  bottom: 0; left: 0; right: 0;
+  height: calc(80% + 58px + env(safe-area-inset-bottom));
+  padding-bottom: calc(58px + env(safe-area-inset-bottom));
   background: rgba(5,7,18,0.97);
   backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
   border-top: 1px solid rgba(18,34,78,0.7);
@@ -495,7 +497,9 @@ html, body {
 }
 
 #panel-backdrop {
-  position: absolute; inset: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  bottom: calc(58px + env(safe-area-inset-bottom));
   background: rgba(0,0,8,0.62); opacity: 0;
   pointer-events: none;
   transition: opacity 0.38s;
